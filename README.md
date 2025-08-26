@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Will My Toddler Eat This? 🍽️
+
+The ultimate parental food predictor - brace yourself for the toddler verdict!
+
+## About
+
+A fun and interactive web app that "predicts" whether your toddler will eat a particular food based on their current mood, plate color, and time of day. Built with humor and designed for exhausted parents who need a laugh while navigating the mysterious world of toddler food preferences.
+
+## Features
+
+- **Food Prediction Engine**: Enter any food and get a humorous prediction
+- **Mood Selection**: Choose from 4 different toddler moods (Adventurous, Picky, Hangry, Sleepy)
+- **Plate Color Impact**: Select from 6 colorful plates because we all know it matters
+- **Time of Day**: Factor in whether it's breakfast, lunch, dinner, or snack time
+- **Entertaining Responses**: Over 60 funny and relatable responses for parents
+- **Beautiful UI**: Built with modern components and smooth animations
+
+## Tech Stack
+
+- **Next.js 15** - React framework with App Router
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Shadcn/ui** - Modern React UI components
+- **Radix UI** - Accessible component primitives
 
 ## Getting Started
 
-First, run the development server:
+First, install dependencies:
+
+```bash
+npm install
+```
+
+Then run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Components Used
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Button** - Interactive buttons with variants
+- **Input** - Food input field
+- **Card** - Container components for sections
+- **Badge** - Success rate display
+- **Separator** - Visual dividers
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+The app uses a pseudo-random algorithm based on the combination of:
+- Food name (converted to lowercase)
+- Selected mood
+- Chosen plate color
+- Time of day
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+These factors are hashed together to consistently return the same result for the same inputs, making it feel like a "real" prediction while maintaining the fun factor.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is created for fun and learning purposes.
+
+---
+
+⚠️ **Disclaimer**: Results are 100% scientifically unproven but emotionally accurate.  
+Made with ❤️ for exhausted parents everywhere.
