@@ -7,6 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
+interface PredictionResult {
+  message: string;
+  percentage: number;
+  type: 'positive' | 'negative' | 'maybe';
+}
+
 const moods = [
   { id: "adventurous", label: "Adventurous", emoji: "🌟", description: "Feeling brave today!" },
   { id: "picky", label: "Picky", emoji: "😤", description: "Everything is suspicious" },
@@ -127,7 +133,7 @@ function getRandomResponse(food: string, mood: string, plateColor: string, time:
   return {
     message: responseArray[responseIndex],
     percentage,
-    type: responseCategory,
+    type: responseCategory as 'positive' | 'negative' | 'maybe',
   }
 }
 
@@ -136,7 +142,7 @@ export default function ToddlerFoodPredictor() {
   const [selectedMood, setSelectedMood] = useState("picky")
   const [selectedPlate, setSelectedPlate] = useState("red")
   const [selectedTime, setSelectedTime] = useState("lunch")
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<PredictionResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
   const handlePredict = async () => {
