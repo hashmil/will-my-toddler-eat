@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# wrangler
+/.wrangler/
+
+# mockup screenshots and local browser test scripts
+/mockups/shots/
+/mockups/*.cjs

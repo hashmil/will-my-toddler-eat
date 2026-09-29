@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>1. High Chair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wall: #BFE6F5; --floor: #F5D7A1; --toy-red: #E63B2E; --toy-yellow: #FFC72C;
+    --toy-blue: #1E6FD9; --toy-green: #2BA84A; --skin: #F6C9A5; --ink: #1B1B2F; --card: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body { background: var(--wall); color: var(--ink); font: 400 15px/1.4 "DM Sans", sans-serif; overflow-x: hidden; }
+  .app { max-width: 480px; margin: 0 auto; position: relative; min-height: 100vh; display: flex; flex-direction: column; }
+  .display { font-family: "Lilita One", sans-serif; font-weight: 400; }
+
+  #stage { position: relative; height: 44vh; min-height: 330px; }
+  #stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .logo { position: absolute; top: 14px; left: 16px; font: 400 24px/1 "Lilita One"; color: var(--ink); pointer-events: none; }
+  .logo span { color: var(--toy-red); }
+  .bubble { position: absolute; transform: translate(0, -100%); background: var(--card); padding: 8px 14px; border-radius: 20px; font: 400 18px/1.1 "Lilita One"; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s; box-shadow: 0 6px 18px rgba(27,27,47,.18); }
+  .bubble::after { content: ""; position: absolute; left: 14px; bottom: -8px; border: 8px solid transparent; border-top-color: var(--card); border-bottom: 0; }
+  .bubble.show { opacity: 1; transform: translate(0, calc(-100% - 6px)); }
+  .shake { animation: shake .45s; }
+  @keyframes shake { 20% { transform: translate(-8px, 4px) rotate(-1deg); } 40% { transform: translate(7px, -5px) rotate(1deg); } 60% { transform: translate(-5px, 2px); } 80% { transform: translate(3px, -2px); } }
+
+  .sheet { flex: 1; background: var(--card); border-radius: 20px 20px 0 0; padding: 14px 16px 20px; box-shadow: 0 -8px 30px rgba(27,27,47,.12); position: relative; z-index: 2; }
+  .food { display: flex; align-items: center; gap: 10px; border: 3px solid var(--ink); border-radius: 20px; padding: 0 14px; height: 52px; }
+  .food .emoji { font-size: 28px; width: 32px; text-align: center; transition: transform .2s; }
+  .food .emoji.pop { transform: scale(1.35) rotate(-10deg); }
+  .food input { flex: 1; border: 0; outline: 0; font: 500 19px "DM Sans"; background: none; color: var(--ink); min-width: 0; }
+  .label { font: 700 13px "DM Sans"; margin: 10px 0 6px; display: flex; justify-content: space-between; }
+  .label em { font-style: normal; font-weight: 500; opacity: .7; }
+  .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .chip { height: 48px; border: 2px solid #E3E6EC; background: var(--card); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; font: 500 12px "DM Sans"; color: var(--ink); cursor: pointer; transition: transform .12s; }
+  .chip b { font-size: 20px; line-height: 1.1; font-weight: 400; }
+  .chip:active { transform: scale(.94); }
+  .chip.on { border-color: var(--ink); background: var(--toy-yellow); }
+  .plates { display: flex; justify-content: space-between; }
+  .plate { width: 42px; height: 42px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; position: relative; box-shadow: inset 0 0 0 6px rgba(255,255,255,.35); transition: transform .12s; }
+  .plate.on { border-color: var(--ink); transform: scale(1.08); }
+  .plate i { position: absolute; top: -10px; right: -8px; font-style: normal; font-size: 16px; }
+  .serve { margin-top: 14px; width: 100%; height: 56px; border: 0; border-radius: 20px; background: var(--toy-red); color: var(--card); font: 400 26px "Lilita One"; letter-spacing: .02em; cursor: pointer; box-shadow: 0 6px 0 #A8261C; transition: transform .08s, box-shadow .08s; }
+  .serve:active { transform: translateY(4px); box-shadow: 0 2px 0 #A8261C; }
+  .serve:disabled { background: #C9CDD6; box-shadow: 0 6px 0 #A6ABB7; }
+
+  .result { position: fixed; left: 50%; bottom: 0; width: 100%; max-width: 480px; transform: translate(-50%, 105%); transition: transform .5s cubic-bezier(.2,1.3,.4,1); background: var(--card); border-radius: 20px 20px 0 0; padding: 20px 18px 24px; z-index: 5; box-shadow: 0 -10px 40px rgba(27,27,47,.25); }
+  .result.show { transform: translate(-50%, 0); }
+  .res-top { display: flex; align-items: center; gap: 14px; }
+  .pct { font: 400 72px/0.9 "Lilita One"; }
+  .verdict { font: 400 24px/1 "Lilita One"; }
+  .verdict small { display: block; font: 500 13px "DM Sans"; margin-top: 4px; opacity: .7; }
+  .yes .pct { color: var(--toy-green); } .maybe .pct { color: #E39B00; } .no .pct { color: var(--toy-red); }
+  .line { font-size: 18px; line-height: 1.35; margin-top: 12px; }
+  .factors { margin-top: 12px; font-size: 13px; border-top: 2px dashed #E3E6EC; padding-top: 8px; }
+  .factors div { display: flex; justify-content: space-between; padding: 3px 0; }
+  .factors .up { color: var(--toy-green); font-weight: 700; } .factors .down { color: var(--toy-red); font-weight: 700; }
+  .res-btns { display: flex; gap: 8px; margin-top: 14px; }
+  .res-btns button { flex: 1; height: 50px; border-radius: 16px; border: 3px solid var(--ink); background: var(--card); font: 400 18px "Lilita One"; color: var(--ink); cursor: pointer; }
+  .res-btns button.primary { background: var(--toy-yellow); }
+
+  #splat { position: fixed; inset: 0; z-index: 10; pointer-events: none; opacity: 0; transition: opacity .6s; }
+  #splat.on { opacity: 1; pointer-events: auto; cursor: pointer; }
+  #splat.wipe { transition: opacity .5s, transform .6s ease-in; transform: translateY(40%); opacity: 0; }
+  #splat svg { width: 100%; height: 100%; }
+  #splat .hint { position: absolute; bottom: 30px; width: 100%; text-align: center; font: 400 20px "Lilita One"; color: var(--card); text-shadow: 0 2px 6px rgba(0,0,0,.5); }
+  .drip { animation: drip 2.4s cubic-bezier(.5,0,.8,1) forwards; }
+  @keyframes drip { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="stage">
+    <div class="logo display">Will my toddler<br><span>eat this?</span></div>
+    <div class="bubble" id="bubble"></div>
+  </div>
+
+  <div class="sheet">
+    <div class="food"><span class="emoji" id="foodEmoji">🍽️</span><input id="food" placeholder="What's on the plate?" autocomplete="off"></div>
+    <div class="label">Mood <em id="moodHint">Tap to change their face</em></div>
+    <div class="row" id="moods"></div>
+    <div class="label">Plate <em id="plateHint"></em></div>
+    <div class="plates" id="plates"></div>
+    <div class="label">Meal</div>
+    <div class="row" id="meals"></div>
+    <button class="serve" id="serve" disabled>SERVE IT</button>
+  </div>
+</div>
+
+<div class="result" id="result"></div>
+<div id="splat"></div>
+
+<script src="predict.js"></script>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js" } }</script>
+<script type="module">
+import * as THREE from "three";
+const T = window.Toddler;
+
+// ---------- state ----------
+const state = { food: "", mood: "picky", plate: "red", meal: "dinner", busy: false };
+const $ = (id) => document.getElementById(id);
+
+// ---------- controls ----------
+const { fav, cursed } = T.todaysPlates();
+$("plateHint").textContent = `👑 ${fav.name.split(" ")[1]} is today's favourite`;
+$("moods").innerHTML = T.MOODS.map((m) => `<button class="chip" data-mood="${m.id}"><b>${m.emoji}</b>${m.label}</button>`).join("");
+$("plates").innerHTML = T.PLATES.map((p) => `<button class="plate" data-plate="${p.id}" style="background:${p.color}" aria-label="${p.name}">${p.id === fav.id ? "<i>👑</i>" : p.id === cursed.id ? "<i>💀</i>" : ""}</button>`).join("");
+$("meals").innerHTML = T.MEALS.map((m) => `<button class="chip" data-meal="${m.id}"><b>${m.emoji}</b>${m.label}</button>`).join("");
+
+function syncControls() {
+  document.querySelectorAll("[data-mood]").forEach((b) => b.classList.toggle("on", b.dataset.mood === state.mood));
+  document.querySelectorAll("[data-plate]").forEach((b) => b.classList.toggle("on", b.dataset.plate === state.plate));
+  document.querySelectorAll("[data-meal]").forEach((b) => b.classList.toggle("on", b.dataset.meal === state.meal));
+  $("serve").disabled = !state.food.trim() || state.busy;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-mood],[data-plate],[data-meal]");
+  if (!b || state.busy) return;
+  if (b.dataset.mood) { state.mood = b.dataset.mood; applyMood(); sfx.pop(); }
+  if (b.dataset.plate) { state.plate = b.dataset.plate; plateMat.color.set(T.PLATES.find((p) => p.id === state.plate).color); sfx.pop(); }
+  if (b.dataset.meal) { state.meal = b.dataset.meal; applyMeal(); sfx.pop(); }
+  syncControls();
+});
+let lastEmoji = "";
+$("food").addEventListener("input", (e) => {
+  state.food = e.target.value;
+  const em = state.food.trim() ? T.foodLook(state.food).emoji : "🍽️";
+  if (em !== lastEmoji) { $("foodEmoji").textContent = em; $("foodEmoji").classList.add("pop"); setTimeout(() => $("foodEmoji").classList.remove("pop"), 180); lastEmoji = em; }
+  // live micro-reaction while typing
+  if (T.isLoved(state.food)) setBrows(0.25, -0.05), setMouth("smile", 1.2);
+  else if (T.isFeared(state.food)) setBrows(-0.35, 0.05), setMouth("frown", 1);
+  else applyMood();
+  syncControls();
+});
+$("food").addEventListener("keydown", (e) => { if (e.key === "Enter" && !$("serve").disabled) serve(); });
+$("serve").addEventListener("click", serve);
+
+// ---------- sound ----------
+const AC = window.AudioContext && new AudioContext();
+function tone(f0, f1, dur, type = "sine", vol = 0.15) {
+  if (!AC) return; if (AC.state === "suspended") AC.resume();
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime;
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur);
+}
+function noise(dur, freq = 800, vol = 0.3) {
+  if (!AC) return; if (AC.state === "suspended") AC.resume();
+  const len = AC.sampleRate * dur, buf = AC.createBuffer(1, len, AC.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  f.type = "lowpass"; f.frequency.value = freq; g.gain.value = vol; s.buffer = buf;
+  s.connect(f).connect(g).connect(AC.destination); s.start();
+}
+const sfx = {
+  pop: () => tone(500, 900, 0.08, "sine", 0.08),
+  drop: () => { tone(300, 80, 0.25, "sine", 0.2); },
+  chomp: () => noise(0.09, 1200, 0.25),
+  whoosh: () => { tone(200, 1400, 0.35, "sawtooth", 0.04); noise(0.35, 2000, 0.1); },
+  splat: () => { noise(0.5, 500, 0.6); tone(160, 40, 0.3, "sine", 0.3); },
+  wah: () => { tone(520, 300, 0.5, "triangle", 0.12); setTimeout(() => tone(480, 220, 0.8, "triangle", 0.12), 450); },
+  hmm: () => tone(220, 260, 0.4, "triangle", 0.1),
+  tada: () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, f, 0.18, "square", 0.05), i * 90)); },
+};
+
+// ---------- scene ----------
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+camera.position.set(0, 3.0, 6.9); camera.lookAt(0, 2.3, 0);
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0xf5d7a1, 1.3); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.8); sun.position.set(3, 7, 5); sun.castShadow = true;
+sun.shadow.mapSize.set(1024, 1024); sun.shadow.camera.left = -4; sun.shadow.camera.right = 4; sun.shadow.camera.top = 5; sun.shadow.camera.bottom = -2; sun.shadow.radius = 6;
+scene.add(sun);
+const lamp = new THREE.PointLight(0xffb070, 0, 12); lamp.position.set(-2, 5, 2); scene.add(lamp);
+
+function tileTexture() {
+  const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d");
+  g.fillStyle = "#BFE6F5"; g.fillRect(0, 0, 256, 256); g.strokeStyle = "#E3F4FB"; g.lineWidth = 6;
+  for (let i = 0; i <= 256; i += 64) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 256); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(256, i); g.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(5, 4); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const wallMat = new THREE.MeshStandardMaterial({ map: tileTexture(), roughness: 0.6 });
+const wall = new THREE.Mesh(new THREE.PlaneGeometry(20, 12), wallMat); wall.position.set(0, 5, -2.5); wall.receiveShadow = true; scene.add(wall);
+const floorMat = new THREE.MeshStandardMaterial({ color: 0xf5d7a1, roughness: 0.9 });
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), floorMat); floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+const mat = (color, rough = 0.45) => new THREE.MeshStandardMaterial({ color, roughness: rough });
+const mesh = (geo, m, parent, pos = [0, 0, 0]) => { const x = new THREE.Mesh(geo, m); x.position.set(...pos); x.castShadow = true; x.receiveShadow = true; parent.add(x); return x; };
+
+// high chair
+const chair = new THREE.Group(); scene.add(chair);
+const red = mat(0xe63b2e), yellow = mat(0xffc72c), blue = mat(0x1e6fd9);
+for (const [x, z] of [[-0.7, -0.5], [0.7, -0.5], [-0.75, 0.55], [0.75, 0.55]]) {
+  const leg = mesh(new THREE.CylinderGeometry(0.07, 0.09, 1.45, 12), red, chair, [x, 0.72, z]);
+  leg.rotation.z = x > 0 ? -0.08 : 0.08;
+}
+mesh(new THREE.BoxGeometry(1.5, 0.16, 1.2), yellow, chair, [0, 1.45, 0]);
+const back = mesh(new THREE.CapsuleGeometry(0.7, 0.5, 8, 16), yellow, chair, [0, 2.2, -0.6]); back.scale.z = 0.18;
+const tray = mesh(new THREE.BoxGeometry(2.3, 0.12, 1.0), blue, chair, [0, 1.95, 0.95]);
+mesh(new THREE.TorusGeometry(1.1, 0.06, 8, 40, Math.PI), blue, chair, [0, 2.0, 0.95]).rotation.x = -Math.PI / 2;
+const plateMat = mat(0xef4444, 0.3);
+const plate = mesh(new THREE.CylinderGeometry(0.5, 0.4, 0.07, 36), plateMat, chair, [0, 2.05, 1.05]);
+mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.075, 36), mat(0xffffff, 0.3), chair, [0, 2.06, 1.05]).material.opacity = 0.35;
+plate.children;
+
+// toddler
+const kid = new THREE.Group(); kid.position.set(0, 1.5, -0.05); scene.add(kid);
+const skinMat = mat(0xf6c9a5, 0.55);
+const onesie = mat(0x2ba84a, 0.5);
+const body = mesh(new THREE.CapsuleGeometry(0.45, 0.35, 8, 20), onesie, kid, [0, 0.55, 0]);
+const bib = mesh(new THREE.CircleGeometry(0.34, 32), mat(0xffffff, 0.8), kid, [0, 0.62, 0.43]);
+const head = new THREE.Group(); head.position.set(0, 1.42, 0.05); kid.add(head);
+mesh(new THREE.SphereGeometry(0.66, 40, 32), skinMat, head);
+mesh(new THREE.SphereGeometry(0.16, 16, 12), skinMat, head, [-0.64, 0, 0]);
+mesh(new THREE.SphereGeometry(0.16, 16, 12), skinMat, head, [0.64, 0, 0]);
+const curl = mesh(new THREE.TorusGeometry(0.12, 0.035, 8, 20, Math.PI * 1.6), mat(0x6b3e26), head, [0.05, 0.7, 0.1]); curl.rotation.y = 0.4;
+const eyeGeo = new THREE.SphereGeometry(0.09, 20, 16), black = mat(0x1b1b2f, 0.2), white = mat(0xffffff, 0.2);
+const eyes = [-0.22, 0.22].map((x) => { const e = mesh(eyeGeo, black, head, [x, 0.1, 0.6]); e.scale.z = 0.6; mesh(new THREE.SphereGeometry(0.028, 8, 8), white, e, [0.03, 0.035, 0.07]); return e; });
+const brows = [-0.22, 0.22].map((x) => { const b = mesh(new THREE.CapsuleGeometry(0.025, 0.14, 4, 8), mat(0x6b3e26), head, [x, 0.28, 0.6]); b.rotation.z = Math.PI / 2; return b; });
+const cheekMat = new THREE.MeshStandardMaterial({ color: 0xff7f8a, transparent: true, opacity: 0.5, roughness: 0.8 });
+const cheeks = [-0.38, 0.38].map((x) => { const c = mesh(new THREE.SphereGeometry(0.11, 16, 12), cheekMat, head, [x, -0.1, 0.5]); c.scale.z = 0.3; c.castShadow = false; return c; });
+const smile = mesh(new THREE.TorusGeometry(0.12, 0.025, 8, 24, Math.PI), black, head, [0, -0.2, 0.62]); smile.rotation.z = Math.PI;
+const mouth = mesh(new THREE.SphereGeometry(0.14, 24, 16), mat(0x7a1f2b, 0.4), head, [0, -0.25, 0.58]); mouth.scale.set(1, 0.05, 0.4); mouth.visible = false;
+const arms = [-1, 1].map((s) => { const p = new THREE.Group(); p.position.set(0.5 * s, 0.85, 0.05); kid.add(p); const a = mesh(new THREE.CapsuleGeometry(0.12, 0.42, 6, 12), skinMat, p, [0, -0.3, 0]); p.rotation.set(-1.05, 0, 0.25 * s); return p; });
+const feet = [-0.22, 0.22].map((x) => mesh(new THREE.SphereGeometry(0.16, 16, 12), onesie, kid, [x, -0.25, 0.6]));
+
+// mood accessories
+const acc = {};
+acc.adventurous = new THREE.Group(); head.add(acc.adventurous);
+mesh(new THREE.CylinderGeometry(0.85, 0.85, 0.04, 36), mat(0x8b5a2b), acc.adventurous, [0, 0.5, 0]);
+mesh(new THREE.CylinderGeometry(0.36, 0.45, 0.42, 24), mat(0x8b5a2b), acc.adventurous, [0, 0.72, 0]);
+mesh(new THREE.CylinderGeometry(0.455, 0.455, 0.08, 24), mat(0xe63b2e), acc.adventurous, [0, 0.56, 0]);
+acc.adventurous.rotation.z = 0.15;
+acc.picky = new THREE.Group(); head.add(acc.picky);
+const monocle = mesh(new THREE.TorusGeometry(0.14, 0.02, 8, 28), mat(0xf7c948, 0.2), acc.picky, [0.22, 0.1, 0.63]);
+mesh(new THREE.TorusGeometry(0.4, 0.008, 4, 30, 1.6), mat(0xf7c948, 0.2), acc.picky, [0.36, -0.28, 0.5]).rotation.z = -1.2;
+acc.sleepy = new THREE.Group(); head.add(acc.sleepy);
+const cap = mesh(new THREE.ConeGeometry(0.5, 1.0, 28), mat(0x1e6fd9), acc.sleepy, [0.1, 0.8, -0.05]); cap.rotation.z = -0.45;
+mesh(new THREE.SphereGeometry(0.12, 16, 12), mat(0xffffff, 0.9), acc.sleepy, [0.42, 1.2, -0.05]);
+acc.hangry = new THREE.Group(); head.add(acc.hangry);
+
+// food sprite
+const texCache = {};
+function emojiTex(e) {
+  if (texCache[e]) return texCache[e];
+  const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d");
+  g.font = "200px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(e, 128, 140);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return (texCache[e] = t);
+}
+const foodSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: emojiTex("🥦") })); foodSprite.scale.set(0.6, 0.6, 1); foodSprite.visible = false; scene.add(foodSprite);
+const FOOD_HOME = new THREE.Vector3(0, 2.3, 1.1);
+
+// particles
+const parts = [];
+function puff(emoji, pos, { vel = [0, 1, 0], life = 1.2, size = 0.35, grav = 0, spin = 0 } = {}) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: emojiTex(emoji), transparent: true })); s.position.copy(pos); s.scale.setScalar(size); scene.add(s);
+  parts.push({ s, v: new THREE.Vector3(...vel), life, max: life, grav, spin });
+}
+
+// ---------- expression helpers ----------
+let skinTarget = new THREE.Color(0xf6c9a5);
+function setBrows(tilt = 0, lift = 0) { brows[0].rotation.z = Math.PI / 2 + tilt; brows[1].rotation.z = Math.PI / 2 - tilt; brows.forEach((b) => (b.position.y = 0.28 + lift)); }
+function setEyes(open = 1) { eyes.forEach((e) => (e.scale.y = Math.max(0.08, open))); }
+function setMouth(mode, amt = 1) {
+  smile.visible = mode === "smile" || mode === "frown" || mode === "flat";
+  mouth.visible = mode === "open";
+  if (mode === "smile") { smile.rotation.z = Math.PI; smile.scale.set(amt, amt, 1); smile.position.y = -0.2; }
+  if (mode === "frown") { smile.rotation.z = 0; smile.scale.set(amt * 0.8, amt * 0.6, 1); smile.position.y = -0.3; }
+  if (mode === "flat") { smile.rotation.z = Math.PI; smile.scale.set(0.8, 0.15, 1); smile.position.y = -0.24; }
+  if (mode === "open") mouth.scale.set(1, 0.05 + amt * 0.9, 0.4);
+}
+function applyMood() {
+  for (const k in acc) acc[k].visible = k === state.mood;
+  skinTarget.set(state.mood === "hangry" ? 0xf08a7a : 0xf6c9a5);
+  ({
+    adventurous: () => { setBrows(0.05, 0.06); setEyes(1.1); setMouth("smile", 1.2); },
+    picky: () => { setBrows(-0.1, 0); brows[1].position.y = 0.34; setEyes(0.75); setMouth("flat"); },
+    hangry: () => { setBrows(-0.45, -0.03); setEyes(0.9); setMouth("frown", 1); },
+    sleepy: () => { setBrows(0.2, -0.02); setEyes(0.25); setMouth("flat"); },
+  })[state.mood]();
+}
+const MEAL_LIGHT = {
+  breakfast: { hemi: 0xfff1d6, hi: 1.25, sun: 0xffd9a0, si: 1.8, wall: 0xffffff, lamp: 0 },
+  lunch: { hemi: 0xffffff, hi: 1.4, sun: 0xffffff, si: 2.0, wall: 0xffffff, lamp: 0 },
+  dinner: { hemi: 0xd9ccf5, hi: 1.05, sun: 0xffb27a, si: 1.4, wall: 0xd2daf0, lamp: 12 },
+  snack: { hemi: 0xffffff, hi: 1.3, sun: 0xfff4e0, si: 1.8, wall: 0xffffff, lamp: 0 },
+};
+function applyMeal() {
+  const L = MEAL_LIGHT[state.meal];
+  hemi.color.set(L.hemi); hemi.intensity = L.hi; sun.color.set(L.sun); sun.intensity = L.si; wallMat.color.set(L.wall); lamp.intensity = L.lamp;
+}
+
+// ---------- tweening ----------
+const tweens = new Set();
+const ease = { io: (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2), out: (t) => 1 - (1 - t) ** 3, in: (t) => t * t * t, lin: (t) => t,
+  bounce: (t) => { const n = 7.5625, d = 2.75; if (t < 1 / d) return n * t * t; if (t < 2 / d) return n * (t -= 1.5 / d) * t + 0.75; if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + 0.9375; return n * (t -= 2.625 / d) * t + 0.984375; } };
+const tween = (ms, fn, e = ease.io) => new Promise((res) => tweens.add({ t0: performance.now(), ms, fn, e, res }));
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// ---------- bubble ----------
+const bubble = $("bubble");
+function say(text, ms = 1800) {
+  bubble.textContent = text; bubble.classList.add("show"); placeBubble();
+  clearTimeout(say.t); if (ms) say.t = setTimeout(() => bubble.classList.remove("show"), ms);
+}
+function placeBubble() {
+  const p = new THREE.Vector3(); head.getWorldPosition(p); p.x += 0.45; p.y += 0.75; p.project(camera);
+  bubble.style.left = Math.min(((p.x + 1) / 2) * stage.clientWidth, stage.clientWidth - bubble.offsetWidth - 8) + "px"; bubble.style.top = ((-p.y + 1) / 2) * stage.clientHeight + "px";
+}
+
+// ---------- reactions ----------
+function headWorld(offset = [0, -0.25, 0.6]) { const v = new THREE.Vector3(...offset); return head.localToWorld(v); }
+
+async function dropFood(look) {
+  foodSprite.material.map = emojiTex(look.emoji); foodSprite.material.rotation = 0; foodSprite.visible = true; foodSprite.scale.set(0.6, 0.6, 1);
+  foodSprite.position.set(0, 6, FOOD_HOME.z);
+  await tween(750, (t) => (foodSprite.position.y = lerp(6, FOOD_HOME.y, t)), ease.bounce);
+  sfx.drop();
+}
+async function consider(r) {
+  sfx.hmm();
+  await tween(500, (t) => { head.rotation.x = lerp(0, 0.35, t); head.rotation.z = lerp(0, 0.18, t); eyes.forEach((e) => (e.position.y = lerp(0.1, 0.02, t))); });
+  await wait(450);
+  await tween(250, (t) => { head.rotation.z = lerp(0.18, -0.18, t); });
+  await wait(350);
+}
+async function straighten(ms = 350) {
+  const rx = head.rotation.x, rz = head.rotation.z, ry = head.rotation.y;
+  await tween(ms, (t) => { head.rotation.x = lerp(rx, 0, t); head.rotation.z = lerp(rz, 0, t); head.rotation.y = lerp(ry, 0, t); eyes.forEach((e) => (e.position.y = lerp(e.position.y, 0.1, t))); });
+}
+
+const REACT = {
+  async gobble(r, dance = false) {
+    setBrows(0.25, 0.06); setEyes(1.15); setMouth("open", 0.1);
+    await straighten(250);
+    await tween(250, (t) => setMouth("open", t));
+    const from = foodSprite.position.clone(), to = headWorld([0, -0.25, 0.75]);
+    await tween(420, (t) => { foodSprite.position.lerpVectors(from, to, t); foodSprite.position.y += Math.sin(t * Math.PI) * 0.8; foodSprite.scale.setScalar(lerp(0.6, 0.25, t)); }, ease.in);
+    foodSprite.visible = false;
+    for (let i = 0; i < 5; i++) { sfx.chomp(); await tween(110, (t) => setMouth("open", 1 - Math.sin(t * Math.PI) * 0.9)); head.rotation.x = (i % 2) * 0.08; }
+    setMouth("smile", 1.4); sfx.tada(); say(r.says, 2200);
+    for (let i = 0; i < 8; i++) puff("💖", headWorld([0, 0.5, 0.2]), { vel: [(Math.random() - 0.5) * 2, 1.5 + Math.random(), 0.5], life: 1.4, size: 0.3 });
+    if (dance) await tween(1600, (t) => { kid.rotation.z = Math.sin(t * Math.PI * 6) * 0.12; arms.forEach((a, i) => (a.rotation.x = -1.05 - Math.abs(Math.sin(t * Math.PI * 6 + i)) * 1.6)); }, ease.lin);
+    else await tween(1400, (t) => { head.rotation.z = Math.sin(t * Math.PI * 4) * 0.12; }, ease.lin);
+  },
+  async suspicious(r) {
+    setBrows(-0.15, 0); brows[1].position.y = 0.36; setEyes(0.5); setMouth("flat");
+    await tween(500, (t) => { head.position.z = lerp(0.05, 0.3, t); head.rotation.x = lerp(head.rotation.x, 0.45, t); });
+    puff("❓", headWorld([0.5, 0.7, 0]), { vel: [0.2, 0.6, 0], life: 1.6, size: 0.45 });
+    await tween(900, (t) => { foodSprite.material.rotation = Math.sin(t * Math.PI * 6) * 0.3; }, ease.lin);
+    arms[1].rotation.x = -1.5;
+    await tween(300, (t) => (foodSprite.position.x = lerp(0, 0.15, t)));
+    say(r.says, 2000);
+    await tween(1200, (t) => { head.rotation.y = Math.sin(t * Math.PI * 3) * 0.3; }, ease.lin);
+    await tween(300, (t) => (head.position.z = lerp(0.3, 0.05, t)));
+  },
+  async negotiate(r) {
+    setBrows(0.1, 0.05); setEyes(1); setMouth("smile", 0.7);
+    await straighten();
+    puff("🍪", headWorld([0.7, 0.8, 0]), { vel: [0.1, 0.4, 0], life: 2.2, size: 0.5 });
+    say(r.says, 2400);
+    await tween(1200, (t) => { arms[1].rotation.x = -1.05 - Math.sin(t * Math.PI) * 0.9; arms[1].rotation.z = lerp(0.25, -0.3, t); head.rotation.z = Math.sin(t * Math.PI * 2) * 0.15; });
+    await wait(700);
+  },
+  async throw(r) {
+    setBrows(-0.45, -0.03); setEyes(1); setMouth("frown", 1);
+    await straighten(250);
+    // wind up
+    await tween(350, (t) => { arms[1].rotation.x = lerp(-1.05, 0.9, t); head.rotation.y = lerp(0, -0.3, t); });
+    await wait(150);
+    sfx.whoosh();
+    const from = foodSprite.position.clone(), to = camera.position.clone().add(new THREE.Vector3(0.1, -0.2, -0.6));
+    const swing = tween(160, (t) => { arms[1].rotation.x = lerp(0.9, -2.4, t); head.rotation.y = lerp(-0.3, 0.2, t); }, ease.in);
+    await tween(560, (t) => { foodSprite.position.lerpVectors(from, to, t); foodSprite.position.y += Math.sin(t * Math.PI) * 1.4; foodSprite.material.rotation = t * 9; foodSprite.scale.setScalar(lerp(0.6, 2.4, t)); }, ease.in);
+    await swing;
+    foodSprite.visible = false;
+    splat(r.look);
+    setMouth("open", 0.7); say(r.says, 2200);
+    await tween(1400, (t) => { head.rotation.x = Math.sin(t * Math.PI * 8) * 0.06; arms[1].rotation.x = lerp(-2.4, -1.05, Math.min(1, t * 2)); }, ease.lin);
+    setMouth("smile", 1.3);
+    await wait(900);
+  },
+  async cry(r) {
+    setBrows(0.4, 0.05); setEyes(0.1); setMouth("open", 1);
+    await straighten(250);
+    sfx.wah(); say(r.says, 2400);
+    const tick = setInterval(() => eyes.forEach((e) => puff("💧", e.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, -0.05, 0.2)), { vel: [e.position.x * 6, 0.8, 1], life: 1, size: 0.18, grav: 5 })), 120);
+    await tween(2200, (t) => { head.rotation.y = Math.sin(t * Math.PI * 8) * 0.25; }, ease.lin);
+    clearInterval(tick);
+    // food shoved off the tray
+    const from = foodSprite.position.clone();
+    await tween(700, (t) => { foodSprite.position.x = lerp(from.x, 1.6, t); foodSprite.position.y = t < 0.5 ? from.y : lerp(from.y, 0.3, (t - 0.5) * 2); foodSprite.material.rotation = t * 4; }, ease.in);
+    sfx.drop();
+  },
+  async gag(r) {
+    setBrows(0.3, 0.06); setEyes(0.3); setMouth("open", 0.5);
+    skinTarget.set(0xb8d99a);
+    await tween(400, (t) => { head.rotation.x = lerp(head.rotation.x, -0.35, t); head.position.z = lerp(0.05, -0.2, t); });
+    say(r.says, 2200);
+    for (let i = 0; i < 3; i++) await tween(220, (t) => { head.position.y = 1.42 + Math.sin(t * Math.PI) * 0.08; });
+    arms[0].rotation.x = -1.6;
+    const from = foodSprite.position.clone();
+    await tween(700, (t) => { foodSprite.position.x = lerp(from.x, -1.7, t); foodSprite.position.y = t < 0.5 ? from.y : lerp(from.y, 0.3, (t - 0.5) * 2); }, ease.in);
+    sfx.drop();
+    await tween(400, (t) => { head.rotation.x = lerp(-0.35, 0, t); head.position.z = lerp(-0.2, 0.05, t); });
+  },
+  async sleep(r) {
+    setEyes(0.08); setMouth("flat"); acc.sleepy.visible = true;
+    await tween(1600, (t) => { head.rotation.x = lerp(head.rotation.x, 0.9, t); head.position.z = lerp(0.05, 0.55, t); head.position.y = lerp(1.42, 1.1, t); }, ease.in);
+    sfx.splat();
+    for (let i = 0; i < 4; i++) setTimeout(() => puff("💤", headWorld([0.4, 0.5, 0]), { vel: [0.4, 0.7, 0], life: 1.8, size: 0.35 }), i * 400);
+    say(r.says, 2200);
+    await wait(1800);
+  },
+};
+REACT.dance = (r) => REACT.gobble(r, true);
+
+// ---------- splat on the glass ----------
+function splat(look) {
+  sfx.splat(); stage.classList.remove("shake"); void stage.offsetWidth; stage.classList.add("shake");
+  navigator.vibrate?.(120);
+  const W = innerWidth, H = innerHeight, cx = W * (0.4 + Math.random() * 0.2), cy = H * 0.3;
+  const blob = (x, y, r, n = 14) => { let d = ""; for (let i = 0; i <= n; i++) { const a = (i / n) * Math.PI * 2, rr = r * (0.7 + Math.random() * 0.5); d += (i ? "L" : "M") + (x + Math.cos(a) * rr).toFixed(1) + "," + (y + Math.sin(a) * rr).toFixed(1); } return d + "Z"; };
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><filter id="goo"><feGaussianBlur stdDeviation="6"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 22 -9"/></filter></defs><g filter="url(#goo)" fill="${look.color}">`;
+  svg += `<path d="${blob(cx, cy, 110, 18)}"/>`;
+  for (let i = 0; i < 14; i++) { const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 120; svg += `<circle cx="${cx + Math.cos(a) * d}" cy="${cy + Math.sin(a) * d}" r="${6 + Math.random() * 18}"/>`; }
+  for (let i = 0; i < 6; i++) { const x = cx - 80 + Math.random() * 160, w = 10 + Math.random() * 16, h = 120 + Math.random() * (H * 0.5); svg += `<rect class="drip" style="transform-origin:${x}px ${cy}px;animation-delay:${Math.random() * 0.4}s" x="${x - w / 2}" y="${cy}" width="${w}" height="${h}" rx="${w / 2}"/>`; }
+  svg += `</g><g fill="#fff" opacity=".35"><ellipse cx="${cx - 40}" cy="${cy - 45}" rx="26" ry="12" transform="rotate(-25 ${cx - 40} ${cy - 45})"/></g>`;
+  for (let i = 0; i < 4; i++) svg += `<text x="${cx - 70 + Math.random() * 140}" y="${cy - 40 + Math.random() * 90}" font-size="${28 + Math.random() * 18}" transform="rotate(${Math.random() * 360} ${cx} ${cy})">${look.emoji}</text>`;
+  svg += `</svg><div class="hint">Tap to wipe the screen</div>`;
+  const el = $("splat"); el.innerHTML = svg; el.className = "on";
+  splatDone = new Promise((res) => { wipeSplat.res = res; wipeSplat.t = setTimeout(wipeSplat, 3200); });
+}
+let splatDone = null;
+function wipeSplat() {
+  clearTimeout(wipeSplat.t); const el = $("splat"); if (!el.classList.contains("on")) return;
+  el.className = "on wipe"; sfx.whoosh(); setTimeout(() => (el.className = ""), 650); wipeSplat.res?.();
+}
+$("splat").addEventListener("click", wipeSplat);
+
+// ---------- flow ----------
+async function serve() {
+  if (state.busy || !state.food.trim()) return;
+  state.busy = true; syncControls(); $("food").blur();
+  const r = T.predict(state);
+  applyMood();
+  await dropFood(r.look);
+  await consider(r);
+  await REACT[r.reaction](r);
+  if (splatDone) { await splatDone; splatDone = null; }
+  showResult(r);
+}
+const VERDICT = { yes: ["They'll eat it", "Clear the table for seconds"], maybe: ["Maybe. Maybe not.", "Proceed with snacks on standby"], no: ["Not a chance", "Have a backup ready"] };
+function showResult(r) {
+  const [v, sub] = VERDICT[r.verdict];
+  $("result").className = "result " + r.verdict;
+  $("result").innerHTML = `
+    <div class="res-top"><div class="pct">${r.pct}%</div><div class="verdict">${v}<small>${sub}</small></div></div>
+    <p class="line">${r.line}</p>
+    <div class="factors">${r.factors.filter(([, d]) => d).map(([l, d]) => `<div><span>${l}</span><span class="${d > 0 ? "up" : "down"}">${d > 0 ? "+" : ""}${d}</span></div>`).join("")}</div>
+    <div class="res-btns"><button id="again" class="primary">Try another food</button><button id="share">Share</button></div>`;
+  requestAnimationFrame(() => $("result").classList.add("show"));
+  $("again").onclick = reset;
+}
+async function reset() {
+  $("result").classList.remove("show"); $("splat").className = ""; bubble.classList.remove("show");
+  foodSprite.visible = false; kid.rotation.set(0, 0, 0); head.position.set(0, 1.42, 0.05); head.rotation.set(0, 0, 0);
+  arms.forEach((a, i) => a.rotation.set(-1.05, 0, 0.25 * (i ? 1 : -1)));
+  state.busy = false; applyMood(); syncControls();
+  $("food").value = ""; state.food = ""; syncControls(); $("food").focus();
+}
+
+// ---------- idle + render loop ----------
+const pointer = new THREE.Vector2(0, 0);
+addEventListener("pointermove", (e) => { pointer.x = (e.clientX / innerWidth) * 2 - 1; pointer.y = -(e.clientY / innerHeight) * 2 + 1; });
+const ray = new THREE.Raycaster();
+renderer.domElement.addEventListener("pointerdown", (e) => {
+  if (state.busy) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), camera);
+  if (ray.intersectObject(kid, true).length) { say(["hee hee!", "BOOP", "again!", "no tickle!"][Math.floor(Math.random() * 4)], 1000); tone(700, 1100, 0.15, "sine", 0.1); tween(500, (t) => (head.rotation.z = Math.sin(t * Math.PI * 4) * 0.15 * (1 - t)), ease.lin); }
+});
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  camera.fov = w / h < 0.9 ? 40 : 34; camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize); resize();
+
+let last = performance.now(), nextBlink = 2000;
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  for (const tw of tweens) { const t = Math.min(1, (now - tw.t0) / tw.ms); tw.fn(tw.e(t)); if (t >= 1) { tweens.delete(tw); tw.res(); } }
+  // breathing, feet, eyes follow
+  body.scale.y = 1 + Math.sin(now / 600) * 0.02;
+  feet.forEach((f, i) => (f.position.z = 0.6 + Math.sin(now / 250 + i * Math.PI) * (state.busy ? 0.02 : 0.08)));
+  if (!state.busy) { head.rotation.y = lerp(head.rotation.y, pointer.x * 0.35, 0.08); head.rotation.x = lerp(head.rotation.x, -pointer.y * 0.15, 0.08); }
+  skinMat.color.lerp(skinTarget, 0.08);
+  if (state.mood === "hangry" && !state.busy && Math.random() < 0.06) { const s = Math.random() < 0.5 ? -1 : 1; puff("💨", head.localToWorld(new THREE.Vector3(0.7 * s, 0.1, 0)), { vel: [s * 0.8, 0.9, 0], life: 0.8, size: 0.25 }); }
+  if (state.mood === "sleepy" && !state.busy && Math.random() < 0.012) puff("💤", headWorld([0.5, 0.6, 0]), { vel: [0.3, 0.5, 0], life: 2, size: 0.3 });
+  // blink
+  if (now > nextBlink && !state.busy && state.mood !== "sleepy") { const o = eyes[0].scale.y; eyes.forEach((e) => (e.scale.y = 0.08)); setTimeout(() => eyes.forEach((e) => (e.scale.y = o)), 120); nextBlink = now + 2200 + Math.random() * 2500; }
+  for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.life -= dt; p.v.y -= p.grav * dt; p.s.position.addScaledVector(p.v, dt); p.s.material.opacity = Math.min(1, p.life / p.max * 2); if (p.life <= 0) { scene.remove(p.s); parts.splice(i, 1); } }
+  if (bubble.classList.contains("show")) placeBubble();
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+applyMood(); applyMeal(); plateMat.color.set(T.PLATES.find((p) => p.id === state.plate).color); syncControls();
+requestAnimationFrame(loop);
+window.__serve = (food, mood, plate, meal) => { Object.assign(state, { food, mood, plate, meal }); $("food").value = food; applyMood(); applyMeal(); plateMat.color.set(T.PLATES.find((p) => p.id === plate).color); syncControls(); return serve(); };
+</script>
+</body>
+</html>

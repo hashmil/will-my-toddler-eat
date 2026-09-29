@@ -1,0 +1,70 @@
+/* Fridge Door. Tokens in mockups/DESIGN.md, concept 2. */
+.fr {
+  --enamel: #F4F6F8; --enamel-shade: #DDE2E7; --paper: #FFFFFF;
+  --crayon-red: #E5383B; --crayon-blue: #2F6FDE; --crayon-green: #38A33C;
+  --crayon-orange: #F6893B; --crayon-brown: #8A5A3B; --crayon-black: #222222;
+  --hand: var(--font-gochi), cursive; --magnet: var(--font-baloo), sans-serif;
+  background: var(--enamel-shade); color: var(--crayon-black); font: 400 19px/1.25 var(--hand); overflow-x: hidden; min-height: 100vh;
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  button { font-family: inherit; }
+  .door { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--enamel); position: relative; padding: 14px 16px 28px; border-left: 6px solid var(--enamel-shade); }
+  .handle { position: absolute; right: 8px; top: 120px; width: 12px; height: 260px; border-radius: 6px; background: var(--enamel-shade); box-shadow: 2px 3px 0 rgba(0,0,0,.08); }
+
+  .title { display: flex; flex-wrap: wrap; gap: 0 2px; line-height: 1; margin: 2px 22px 8px 0; font-weight: 400; }
+  .title .w { display: inline-flex; margin-right: 12px; }
+  .mag { font: 800 34px/1 var(--magnet); display: inline-block; text-shadow: 0 2px 0 rgba(0,0,0,.18), 0 4px 3px rgba(0,0,0,.12); transition: transform .2s; }
+  .mag:hover { transform: translateY(-3px) rotate(0deg) !important; }
+
+  .sheet { background: var(--paper); position: relative; transform: rotate(-1.5deg); box-shadow: 2px 3px 0 rgba(0,0,0,.08), 0 8px 18px rgba(0,0,0,.06); margin-top: 16px; }
+  .pin { position: absolute; top: -10px; width: 26px; height: 26px; border-radius: 50%; box-shadow: inset -3px -4px 0 rgba(0,0,0,.18), 1px 2px 0 rgba(0,0,0,.2); z-index: 2; }
+  .face-wrap { position: relative; }
+  #face { width: 100%; display: block; overflow: visible; }
+  .say { position: absolute; right: 8px; top: 12px; max-width: 58%; font-size: 24px; line-height: 1.05; color: var(--crayon-blue); transform: rotate(4deg) scale(.6); opacity: 0; transition: .25s cubic-bezier(.3,1.6,.5,1); text-align: center; padding: 10px 12px; isolation: isolate; }
+  .say.show { opacity: 1; transform: rotate(4deg) scale(1); }
+  .say svg { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 18px); z-index: -1; overflow: visible; }
+  .caption { text-align: center; font-size: 17px; color: var(--crayon-brown); padding: 0 12px 10px; margin-top: -6px; }
+
+  .note { margin-top: 18px; background: #FFF6A8; padding: 10px 14px 12px; transform: rotate(1deg); box-shadow: 2px 3px 0 rgba(0,0,0,.08); position: relative; }
+  .note label { font-size: 17px; color: var(--crayon-brown); display: block; }
+  .note input { width: 100%; border: 0; border-bottom: 2px dashed var(--crayon-brown); background: none; font: 400 30px var(--hand); color: var(--crayon-black); outline: 0; padding: 2px 0; }
+  .note .emo { position: absolute; right: 12px; bottom: 12px; font-size: 32px; animation: fr-pop .25s; }
+
+  .label { margin: 16px 0 6px; font-size: 18px; color: var(--crayon-brown); display: flex; justify-content: space-between; }
+  .label em { font-style: normal; font-size: 15px; }
+  .magnets { display: flex; justify-content: space-between; }
+  .magnet { width: 76px; height: 76px; border-radius: 50%; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font: 400 13px var(--hand); color: var(--crayon-black); background: var(--paper); box-shadow: inset -4px -5px 0 rgba(0,0,0,.08), 2px 3px 0 rgba(0,0,0,.15); transition: transform .15s; }
+  .magnet b { font-size: 30px; line-height: 1; font-weight: 400; }
+  .magnet.on { transform: translateY(-4px) rotate(-6deg) scale(1.06); box-shadow: inset -4px -5px 0 rgba(0,0,0,.08), 4px 8px 0 rgba(0,0,0,.15), 0 0 0 4px var(--crayon-black); }
+  .plate { width: 48px; height: 48px; border-radius: 50%; border: 0; position: relative; cursor: pointer; box-shadow: inset 0 0 0 7px rgba(255,255,255,.4), inset -3px -4px 0 rgba(0,0,0,.12), 2px 3px 0 rgba(0,0,0,.15); transition: transform .15s; }
+  .plate.on { transform: translateY(-4px) scale(1.08); box-shadow: inset 0 0 0 7px rgba(255,255,255,.4), 0 0 0 3px var(--enamel), 0 0 0 6px var(--crayon-black); }
+  .plate i { position: absolute; top: -12px; right: -8px; font-style: normal; font-size: 18px; }
+  .meals .magnet { width: 76px; height: 56px; border-radius: 12px; }
+
+  .ask { margin-top: 22px; width: 100%; height: 64px; border: 0; border-radius: 14px; background: var(--crayon-red); color: var(--paper); font: 800 26px/1 var(--magnet); cursor: pointer; box-shadow: inset -4px -6px 0 rgba(0,0,0,.15), 3px 5px 0 rgba(0,0,0,.2); transition: transform .08s; }
+  .ask:active { transform: translateY(3px); }
+  .ask:disabled { background: #C8CDD3; cursor: default; }
+
+  .result { margin-top: 26px; background: var(--paper); padding: 22px 18px 18px; position: relative; transform-origin: 50% 0; box-shadow: 2px 3px 0 rgba(0,0,0,.08), 0 8px 18px rgba(0,0,0,.06); animation: fr-stick .7s cubic-bezier(.3,1.5,.5,1) forwards; }
+  .result .big { font: 400 88px/0.9 var(--hand); }
+  .result .v { font-size: 30px; line-height: 1; }
+  .result .line { font-size: 22px; margin-top: 10px; }
+  .result ul { list-style: none; margin-top: 12px; font-size: 18px; border-top: 2px dashed var(--enamel-shade); padding-top: 6px; }
+  .result li { display: flex; justify-content: space-between; }
+  .result .up { color: var(--crayon-green); } .result .down { color: var(--crayon-red); }
+  .yes .big { color: var(--crayon-green); } .maybe .big { color: var(--crayon-orange); } .no .big { color: var(--crayon-red); }
+  .sticker { position: absolute; right: 14px; top: 18px; width: 92px; height: 92px; transform: rotate(12deg) scale(0); animation: fr-slap .35s .6s cubic-bezier(.3,1.8,.5,1) forwards; }
+  .btns { display: flex; gap: 8px; margin-top: 14px; }
+  .again { flex: 1; height: 52px; border: 3px solid var(--crayon-black); border-radius: 12px; background: var(--paper); font: 800 16px var(--magnet); white-space: nowrap; color: var(--crayon-black); cursor: pointer; }
+  .shake { animation: fr-shake .5s; }
+  .stuck { position: absolute; font-size: 44px; pointer-events: none; z-index: 5; }
+
+  .vnav { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: center; font-size: 18px; }
+  .vnav span { width: 100%; text-align: center; color: var(--crayon-brown); }
+  .vnav a { color: var(--crayon-blue); text-decoration: underline wavy; text-underline-offset: 4px; }
+}
+
+@keyframes fr-stick { from { transform: translateY(-120px) rotate(-14deg) scale(1.1); opacity: 0; } to { transform: translateY(0) rotate(2deg); opacity: 1; } }
+@keyframes fr-slap { to { transform: rotate(12deg) scale(1); } }
+@keyframes fr-shake { 20% { transform: rotate(-4deg) translateX(-6px); } 40% { transform: rotate(2deg) translateX(6px); } 60% { transform: rotate(-3deg) translateX(-4px); } 80% { transform: rotate(-1deg) translateX(2px); } }
+@keyframes fr-pop { from { transform: scale(1.5) rotate(-15deg); } }

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A. Lab report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FFFFFF; --desk: #E4E7EB; --ink: #111418; --form: #1D4F91;
+    --rule: #C9D1DA; --flag-low: #C8102E; --flag-query: #A15C00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--desk); color: var(--ink); font: 400 15px/1.45 "IBM Plex Sans", sans-serif; }
+  .sheet { max-width: 480px; margin: 0 auto; background: var(--paper); border: 1px solid var(--rule); padding: 20px; min-height: 100vh; }
+  .mono { font-family: "IBM Plex Mono", monospace; }
+
+  .head { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 10px; border-bottom: 2px solid var(--form); }
+  .head h1 { font-size: 19px; font-weight: 600; color: var(--form); line-height: 1.15; }
+  .head .dept { font-size: 11px; color: var(--form); text-align: right; }
+  .meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; padding: 10px 0 14px; }
+  .meta dt { color: var(--form); }
+
+  h2 { font-size: 11px; font-weight: 600; color: var(--form); letter-spacing: .02em; margin: 14px 0 6px; }
+  .field { border: 1px solid var(--ink); padding: 8px 10px; font-size: 19px; width: 100%; font-family: inherit; }
+  .field-label { font-size: 11px; color: var(--form); display: block; margin-bottom: 4px; }
+
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .checks.four { grid-template-columns: repeat(4, auto); justify-content: space-between; }
+  .check { display: flex; align-items: center; gap: 8px; height: 36px; font-size: 15px; border-bottom: 1px solid var(--rule); }
+  .checks.four .check { border: 0; gap: 6px; font-size: 13px; }
+  .box { width: 16px; height: 16px; border: 1.5px solid var(--ink); display: grid; place-items: center; font: 500 13px/1 "IBM Plex Mono", monospace; }
+
+  .plates { display: flex; gap: 8px; }
+  .plate { width: 44px; height: 44px; border: 1px solid var(--ink); position: relative; }
+  .plate.on { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .plates-caption { font-size: 13px; margin-top: 6px; }
+
+  .run { margin-top: 16px; width: 100%; height: 48px; background: var(--ink); color: var(--paper); border: 0; font: 600 15px "IBM Plex Sans", sans-serif; }
+
+  .result { margin-top: 20px; border-top: 2px solid var(--form); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-weight: 600; font-size: 11px; color: var(--form); padding: 8px 0 6px; border-bottom: 1px solid var(--rule); }
+  td { padding: 8px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+  td.num, th.num { text-align: right; padding-right: 8px; }
+  td.flag { width: 28px; }
+  .f { display: inline-block; width: 18px; text-align: center; color: var(--paper); font: 500 11px/18px "IBM Plex Mono", monospace; }
+  .f.low { background: var(--flag-low); }
+  .f.high { background: var(--flag-low); }
+
+  .headline { display: flex; align-items: baseline; gap: 10px; padding: 14px 0 4px; }
+  .headline .big { font: 500 56px/1 "IBM Plex Mono", monospace; color: var(--flag-low); }
+  .headline .big-flag { font: 500 24px/1 "IBM Plex Mono", monospace; color: var(--paper); background: var(--flag-low); padding: 4px 8px; }
+  .headline-label { font-size: 13px; }
+
+  .comment { margin-top: 16px; font-size: 15px; }
+  .comment p { font-style: italic; font-size: 19px; line-height: 1.35; margin-top: 4px; }
+  .sig { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 11px; }
+  .sig .hand { font: italic 400 19px "IBM Plex Sans", sans-serif; border-bottom: 1px solid var(--ink); padding: 0 16px 2px 0; }
+  .actions { display: flex; gap: 8px; margin-top: 20px; }
+  .actions button { flex: 1; height: 44px; background: var(--paper); border: 1px solid var(--ink); font: 600 13px "IBM Plex Sans", sans-serif; color: var(--ink); }
+  .foot { margin-top: 20px; font-size: 11px; color: var(--form); border-top: 1px solid var(--rule); padding-top: 8px; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="head">
+    <h1>Toddler Acceptance<br>Assay</h1>
+    <div class="dept">Dept. of Mealtime Studies<br>Form TAA-1</div>
+  </div>
+  <dl class="meta">
+    <dt>Specimen ID</dt><dd class="mono">TAA-3F9C-1142</dd>
+    <dt>Collected</dt><dd class="mono">29 SEP 2026 18:02</dd>
+    <dt>Patient</dt><dd>Toddler, 1 (one)</dd>
+  </dl>
+
+  <label class="field-label" for="food">Specimen (food)</label>
+  <input id="food" class="field" value="Broccoli, steamed">
+
+  <h2>Patient mood</h2>
+  <div class="checks">
+    <div class="check"><span class="box"></span>Adventurous</div>
+    <div class="check"><span class="box"></span>Picky</div>
+    <div class="check"><span class="box">X</span><strong>Hangry</strong></div>
+    <div class="check"><span class="box"></span>Sleepy</div>
+  </div>
+
+  <h2>Plate colour</h2>
+  <div class="plates">
+    <div class="plate" style="background:#ef4444"></div>
+    <div class="plate on" style="background:#3b82f6"></div>
+    <div class="plate" style="background:#22c55e"></div>
+    <div class="plate" style="background:#eab308"></div>
+    <div class="plate" style="background:#a855f7"></div>
+    <div class="plate" style="background:#ec4899"></div>
+  </div>
+  <div class="plates-caption">Ocean Blue <span class="mono" style="color:#1D4F91">(not the red one)</span></div>
+
+  <h2>Meal</h2>
+  <div class="checks four">
+    <div class="check"><span class="box"></span>Breakfast</div>
+    <div class="check"><span class="box"></span>Lunch</div>
+    <div class="check"><span class="box">X</span><strong>Dinner</strong></div>
+    <div class="check"><span class="box"></span>Snack</div>
+  </div>
+
+  <button class="run">Run assay</button>
+
+  <section class="result">
+    <div class="headline">
+      <span class="big">12%</span><span class="big-flag">L</span>
+    </div>
+    <div class="headline-label">Probability of consumption. Reference range 60 to 100%.</div>
+
+    <table style="margin-top:12px">
+      <tr><th>Test</th><th class="num">Result</th><th>Flag</th><th>Ref.</th></tr>
+      <tr><td>Bites before refusal</td><td class="num mono">0.5</td><td class="flag"><span class="f low">L</span></td><td class="mono">3 to 10</td></tr>
+      <tr><td>Floor coverage</td><td class="num mono">70%</td><td class="flag"><span class="f high">H</span></td><td class="mono">0 to 5</td></tr>
+      <tr><td>Requests for pasta</td><td class="num mono">4</td><td class="flag"><span class="f high">H</span></td><td class="mono">0 to 1</td></tr>
+    </table>
+
+    <div class="comment">
+      <span class="field-label">Consultant's comment</span>
+      <p>Not a chance. They'll take one look and declare it "yucky" without even trying it.</p>
+    </div>
+
+    <div class="sig">
+      <div><div class="hand">T. Oddler</div>Dr T. Oddler, Consultant in Refusal</div>
+      <div class="mono">Page 1 of 1</div>
+    </div>
+
+    <div class="actions">
+      <button>New specimen</button>
+      <button>Share report</button>
+    </div>
+  </section>
+
+  <div class="foot">Results are scientifically unproven but emotionally accurate.</div>
+</div>
+</body>
+</html>

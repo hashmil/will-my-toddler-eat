@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>2. Fridge Door</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Gochi+Hand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --enamel: #F4F6F8; --enamel-shade: #DDE2E7; --paper: #FFFFFF;
+    --crayon-red: #E5383B; --crayon-blue: #2F6FDE; --crayon-green: #38A33C;
+    --crayon-orange: #F6893B; --crayon-brown: #8A5A3B; --crayon-black: #222222;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--enamel-shade); color: var(--crayon-black); font: 400 19px/1.25 "Gochi Hand", cursive; overflow-x: hidden; }
+  .door { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--enamel); position: relative; padding: 14px 16px 28px; border-left: 6px solid var(--enamel-shade); }
+  .handle { position: absolute; right: 8px; top: 120px; width: 12px; height: 260px; border-radius: 6px; background: var(--enamel-shade); box-shadow: 2px 3px 0 rgba(0,0,0,.08); }
+
+  /* alphabet magnets */
+  .title { display: flex; flex-wrap: wrap; gap: 0 2px; line-height: 1; margin: 2px 22px 8px 0; }
+  .title .w { display: inline-flex; margin-right: 12px; }
+  .mag { font: 800 34px/1 "Baloo 2", sans-serif; display: inline-block; text-shadow: 0 2px 0 rgba(0,0,0,.18), 0 4px 3px rgba(0,0,0,.12); transition: transform .2s; }
+  .mag:hover { transform: translateY(-3px) rotate(0deg) !important; }
+
+  /* the drawing */
+  .sheet { background: var(--paper); position: relative; transform: rotate(-1.5deg); box-shadow: 2px 3px 0 rgba(0,0,0,.08), 0 8px 18px rgba(0,0,0,.06); margin-top: 16px; }
+  .pin { position: absolute; top: -10px; width: 26px; height: 26px; border-radius: 50%; box-shadow: inset -3px -4px 0 rgba(0,0,0,.18), 1px 2px 0 rgba(0,0,0,.2); z-index: 2; }
+  .face-wrap { position: relative; }
+  #face { width: 100%; display: block; overflow: visible; }
+  .say { position: absolute; right: 8px; top: 12px; max-width: 58%; font-size: 24px; line-height: 1.05; color: var(--crayon-blue); transform: rotate(4deg) scale(.6); opacity: 0; transition: .25s cubic-bezier(.3,1.6,.5,1); text-align: center; padding: 10px 12px; }
+  .say.show { opacity: 1; transform: rotate(4deg) scale(1); }
+  .say svg { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 18px); z-index: -1; overflow: visible; }
+  .caption { text-align: center; font-size: 17px; color: var(--crayon-brown); padding: 0 12px 10px; margin-top: -6px; }
+
+  /* food note */
+  .note { margin-top: 18px; background: #FFF6A8; padding: 10px 14px 12px; transform: rotate(1deg); box-shadow: 2px 3px 0 rgba(0,0,0,.08); position: relative; }
+  .note label { font-size: 17px; color: var(--crayon-brown); display: block; }
+  .note input { width: 100%; border: 0; border-bottom: 2px dashed var(--crayon-brown); background: none; font: 400 30px "Gochi Hand"; color: var(--crayon-black); outline: 0; padding: 2px 0; }
+  .note .emo { position: absolute; right: 12px; bottom: 12px; font-size: 32px; transition: transform .2s; }
+
+  .label { margin: 16px 0 6px; font-size: 18px; color: var(--crayon-brown); display: flex; justify-content: space-between; }
+  .label em { font-style: normal; font-size: 15px; }
+  .magnets { display: flex; justify-content: space-between; }
+  .magnet { width: 76px; height: 76px; border-radius: 50%; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font: 400 13px "Gochi Hand"; color: var(--crayon-black); background: var(--paper); box-shadow: inset -4px -5px 0 rgba(0,0,0,.08), 2px 3px 0 rgba(0,0,0,.15); transition: transform .15s; }
+  .magnet b { font-size: 30px; line-height: 1; font-weight: 400; }
+  .magnet.on { transform: translateY(-4px) rotate(-6deg) scale(1.06); box-shadow: inset -4px -5px 0 rgba(0,0,0,.08), 4px 8px 0 rgba(0,0,0,.15), 0 0 0 4px var(--crayon-black); }
+  .plate { width: 48px; height: 48px; border-radius: 50%; border: 0; position: relative; cursor: pointer; box-shadow: inset 0 0 0 7px rgba(255,255,255,.4), inset -3px -4px 0 rgba(0,0,0,.12), 2px 3px 0 rgba(0,0,0,.15); transition: transform .15s; }
+  .plate.on { transform: translateY(-4px) scale(1.08); box-shadow: inset 0 0 0 7px rgba(255,255,255,.4), 0 0 0 3px var(--enamel), 0 0 0 6px var(--crayon-black); }
+  .plate i { position: absolute; top: -12px; right: -8px; font-style: normal; font-size: 18px; }
+  .meals .magnet { width: 76px; height: 56px; border-radius: 12px; }
+
+  .ask { margin-top: 22px; width: 100%; height: 64px; border: 0; border-radius: 14px; background: var(--crayon-red); color: var(--paper); font: 800 26px/1 "Baloo 2"; cursor: pointer; box-shadow: inset -4px -6px 0 rgba(0,0,0,.15), 3px 5px 0 rgba(0,0,0,.2); transition: transform .08s; }
+  .ask:active { transform: translateY(3px); }
+  .ask:disabled { background: #C8CDD3; }
+
+  /* result drawing */
+  .result { margin-top: 26px; background: var(--paper); padding: 22px 18px 18px; position: relative; transform-origin: 50% 0; box-shadow: 2px 3px 0 rgba(0,0,0,.08), 0 8px 18px rgba(0,0,0,.06); display: none; }
+  .result.show { display: block; animation: stick .7s cubic-bezier(.3,1.5,.5,1) forwards; }
+  @keyframes stick { from { transform: translateY(-120px) rotate(-14deg) scale(1.1); opacity: 0; } to { transform: translateY(0) rotate(2deg); opacity: 1; } }
+  .result .big { font: 400 88px/0.9 "Gochi Hand"; }
+  .result .v { font-size: 30px; line-height: 1; }
+  .result .line { font-size: 22px; margin-top: 10px; }
+  .result ul { list-style: none; margin-top: 12px; font-size: 18px; border-top: 2px dashed var(--enamel-shade); padding-top: 6px; }
+  .result li { display: flex; justify-content: space-between; }
+  .result .up { color: var(--crayon-green); } .result .down { color: var(--crayon-red); }
+  .yes .big { color: var(--crayon-green); } .maybe .big { color: var(--crayon-orange); } .no .big { color: var(--crayon-red); }
+  .sticker { position: absolute; right: 14px; top: 18px; width: 92px; height: 92px; transform: rotate(12deg) scale(0); animation: slap .35s .6s cubic-bezier(.3,1.8,.5,1) forwards; }
+  @keyframes slap { to { transform: rotate(12deg) scale(1); } }
+  .result .again { margin-top: 14px; width: 100%; height: 52px; border: 3px solid var(--crayon-black); border-radius: 12px; background: var(--paper); font: 800 20px "Baloo 2"; cursor: pointer; }
+  .shake { animation: shake .5s; }
+  @keyframes shake { 20% { transform: rotate(-4deg) translateX(-6px); } 40% { transform: rotate(2deg) translateX(6px); } 60% { transform: rotate(-3deg) translateX(-4px); } 80% { transform: rotate(-1deg) translateX(2px); } }
+  .splat { position: absolute; font-size: 44px; pointer-events: none; z-index: 5; }
+</style>
+</head>
+<body>
+<div class="door" id="door">
+  <div class="handle"></div>
+  <div class="title" id="title"></div>
+
+  <div class="sheet" id="sheet">
+    <span class="pin" style="left:18px;background:var(--crayon-blue)"></span>
+    <span class="pin" style="right:18px;background:var(--crayon-green)"></span>
+    <div class="face-wrap">
+      <svg id="face" viewBox="0 0 320 290" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="crayon" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence id="wobble" type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="1" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="5" result="d"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="4" result="g"/>
+            <feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.9" result="ga"/>
+            <feComposite in="d" in2="ga" operator="in"/>
+          </filter>
+          <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+            <rect width="7" height="7" fill="#FBD9BE"/><line x1="0" y1="0" x2="0" y2="7" stroke="#F6B98E" stroke-width="3.5"/>
+          </pattern>
+          <pattern id="hatchRed" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+            <rect width="7" height="7" fill="#F9B3A6"/><line x1="0" y1="0" x2="0" y2="7" stroke="#EF8573" stroke-width="3.5"/>
+          </pattern>
+          <pattern id="hatchGreen" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+            <rect width="7" height="7" fill="#D5E9B8"/><line x1="0" y1="0" x2="0" y2="7" stroke="#A9D07C" stroke-width="3.5"/>
+          </pattern>
+        </defs>
+        <g filter="url(#crayon)" stroke-linecap="round" stroke-linejoin="round">
+          <g id="head" style="transform-origin:160px 160px">
+            <circle cx="62" cy="160" r="20" fill="url(#hatch)" stroke="#8A5A3B" stroke-width="5"/>
+            <circle cx="258" cy="160" r="20" fill="url(#hatch)" stroke="#8A5A3B" stroke-width="5"/>
+            <circle id="skin" cx="160" cy="160" r="100" fill="url(#hatch)" stroke="#8A5A3B" stroke-width="6"/>
+            <path d="M120 70 q10 -30 30 -12 q10 -34 32 -6 q16 -24 26 8" fill="none" stroke="#8A5A3B" stroke-width="6"/>
+            <g id="cheeks" opacity=".5">
+              <circle cx="100" cy="190" r="17" fill="#E5383B" opacity=".45"/>
+              <circle cx="220" cy="190" r="17" fill="#E5383B" opacity=".45"/>
+            </g>
+            <g id="eyes">
+              <g id="eyeL"><ellipse cx="122" cy="148" rx="22" ry="24" fill="#fff" stroke="#222" stroke-width="5"/><circle class="pupil" cx="122" cy="150" r="10" fill="#222"/><path class="star" d="M122 136 l4 9 10 1 -7 7 2 10 -9 -5 -9 5 2 -10 -7 -7 10 -1z" fill="#F6893B" stroke="#E5383B" stroke-width="2" style="display:none"/><path class="lid" d="M98 148 Q122 136 146 148" fill="url(#hatch)" stroke="#222" stroke-width="5" style="display:none"/></g>
+              <g id="eyeR"><ellipse cx="198" cy="148" rx="22" ry="24" fill="#fff" stroke="#222" stroke-width="5"/><circle class="pupil" cx="198" cy="150" r="10" fill="#222"/><path class="star" d="M198 136 l4 9 10 1 -7 7 2 10 -9 -5 -9 5 2 -10 -7 -7 10 -1z" fill="#F6893B" stroke="#E5383B" stroke-width="2" style="display:none"/><path class="lid" d="M174 148 Q198 136 222 148" fill="url(#hatch)" stroke="#222" stroke-width="5" style="display:none"/></g>
+            </g>
+            <path id="browL" d="M102 112 L142 112" stroke="#8A5A3B" stroke-width="7" style="transform-origin:122px 112px"/>
+            <path id="browR" d="M178 112 L218 112" stroke="#8A5A3B" stroke-width="7" style="transform-origin:198px 112px"/>
+            <path id="mouth" d="M125 210 Q160 225 195 210" fill="none" stroke="#222" stroke-width="6"/>
+            <g id="tears" stroke="#2F6FDE" stroke-width="6" fill="none" style="display:none">
+              <path d="M112 172 q-4 30 2 60" class="tear"/><path d="M208 172 q4 30 -2 60" class="tear"/>
+            </g>
+            <g id="hat-adventurous" style="display:none"><path d="M100 72 L160 10 L220 72 Z" fill="#F6893B" stroke="#E5383B" stroke-width="5"/><circle cx="160" cy="10" r="10" fill="#E5383B"/><path d="M125 50 l10 10 M150 36 l10 10 M175 48 l10 10" stroke="#fff" stroke-width="4"/></g>
+            <g id="hat-sleepy" style="display:none"><path d="M78 88 Q160 20 244 88 Q250 70 280 110 L300 150" fill="#2F6FDE" stroke="#1d4fa8" stroke-width="5"/><circle cx="300" cy="150" r="13" fill="#fff" stroke="#1d4fa8" stroke-width="4"/></g>
+            <g id="hat-picky" style="display:none"><circle cx="198" cy="148" r="30" fill="none" stroke="#F6893B" stroke-width="5"/><path d="M226 158 q20 40 -8 80" fill="none" stroke="#F6893B" stroke-width="3"/></g>
+            <g id="hat-hangry" style="display:none" stroke="#9aa3ad" stroke-width="5" fill="none"><path d="M40 140 q-12 -12 0 -24 q12 -12 0 -24"/><path d="M280 140 q12 -12 0 -24 q-12 -12 0 -24"/></g>
+          </g>
+          <text id="foodFly" x="160" y="330" font-size="52" text-anchor="middle" style="display:none">🥦</text>
+          <text id="zzz" x="250" y="70" font-size="30" fill="#2F6FDE" font-family="Gochi Hand" style="display:none">z z Z</text>
+        </g>
+      </svg>
+      <div class="say" id="say"><svg viewBox="0 0 100 60" preserveAspectRatio="none"><path d="M6 8 Q50 0 94 8 Q100 30 94 46 Q60 52 30 48 L14 60 L18 46 Q2 40 6 8Z" fill="#fff" stroke="#2F6FDE" stroke-width="2.5" filter="url(#crayon)"/></svg><span id="sayText"></span></div>
+    </div>
+    <div class="caption" id="caption">"me" by Toddler, age 2</div>
+  </div>
+
+  <div class="note">
+    <label for="food">Tonight we are trying...</label>
+    <input id="food" autocomplete="off" placeholder="write a food">
+    <span class="emo" id="emo"></span>
+  </div>
+
+  <div class="label">Their mood</div>
+  <div class="magnets" id="moods"></div>
+  <div class="label">Plate <em id="plateHint"></em></div>
+  <div class="magnets" id="plates"></div>
+  <div class="label">Meal</div>
+  <div class="magnets meals" id="meals"></div>
+
+  <button class="ask" id="ask" disabled>ASK THE TODDLER</button>
+
+  <div class="result" id="result"></div>
+</div>
+
+<script src="predict.js"></script>
+<script>
+const T = window.Toddler;
+const $ = (id) => document.getElementById(id);
+const state = { food: "", mood: "picky", plate: "red", meal: "dinner", busy: false };
+
+// title magnets
+const COLORS = ["#E5383B", "#2F6FDE", "#38A33C", "#F6893B", "#F7C948", "#A855F7"];
+$("title").innerHTML = "WILL MY TODDLER EAT THIS?".split(" ").map((w, wi) =>
+  `<span class="w">${[...w].map((c, i) => `<span class="mag" style="color:${COLORS[(wi * 3 + i * 5) % COLORS.length]};transform:rotate(${((wi * 7 + i * 13) % 17) - 8}deg) translateY(${((i * 11) % 5) - 2}px)">${c}</span>`).join("")}</span>`).join("");
+
+const { fav, cursed } = T.todaysPlates();
+$("plateHint").textContent = `👑 ${fav.name.split(" ")[1].toLowerCase()} is today's favourite`;
+$("moods").innerHTML = T.MOODS.map((m) => `<button class="magnet" data-mood="${m.id}"><b>${m.emoji}</b>${m.label}</button>`).join("");
+$("plates").innerHTML = T.PLATES.map((p) => `<button class="plate" data-plate="${p.id}" style="background:${p.color}" aria-label="${p.name}">${p.id === fav.id ? "<i>👑</i>" : p.id === cursed.id ? "<i>💀</i>" : ""}</button>`).join("");
+$("meals").innerHTML = T.MEALS.map((m) => `<button class="magnet" data-meal="${m.id}"><b>${m.emoji}</b>${m.label}</button>`).join("");
+
+function sync() {
+  document.querySelectorAll("[data-mood]").forEach((b) => b.classList.toggle("on", b.dataset.mood === state.mood));
+  document.querySelectorAll("[data-plate]").forEach((b) => b.classList.toggle("on", b.dataset.plate === state.plate));
+  document.querySelectorAll("[data-meal]").forEach((b) => b.classList.toggle("on", b.dataset.meal === state.meal));
+  $("ask").disabled = !state.food.trim() || state.busy;
+}
+
+// ---------- sound ----------
+const AC = window.AudioContext && new AudioContext();
+function tone(f0, f1, dur, type = "sine", vol = 0.12) {
+  if (!AC) return; if (AC.state === "suspended") AC.resume();
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime;
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur);
+}
+const clack = () => tone(900, 300, 0.06, "square", 0.05);
+
+// ---------- face ----------
+const face = { curve: 10, open: 0, brow: 0, browLift: 0, lookX: 0, lookY: 0, cheeks: 0.5, lids: false, stars: false, skin: "hatch", tears: false };
+let target = { ...face };
+function mouthPath(c, o) {
+  if (o > 0.05) { const h = 8 + o * 34; return `M125 ${210 - h * 0.3} Q160 ${210 - h * 0.6} 195 ${210 - h * 0.3} Q200 ${210 + h * 0.6} 160 ${210 + h} Q120 ${210 + h * 0.6} 125 ${210 - h * 0.3}Z`; }
+  return `M125 210 Q160 ${210 + c} 195 210`;
+}
+function renderFace() {
+  for (const k of ["curve", "open", "brow", "browLift", "lookX", "lookY", "cheeks"]) face[k] += (target[k] - face[k]) * 0.18;
+  const m = $("mouth"); m.setAttribute("d", mouthPath(face.curve, face.open)); m.setAttribute("fill", face.open > 0.05 ? "#8A1C2B" : "none");
+  $("browL").style.transform = `translateY(${-face.browLift}px) rotate(${face.brow}deg)`;
+  $("browR").style.transform = `translateY(${-face.browLift - (target.oneBrow || 0)}px) rotate(${-face.brow}deg)`;
+  document.querySelectorAll(".pupil").forEach((p, i) => { p.setAttribute("cx", (i ? 198 : 122) + face.lookX); p.setAttribute("cy", 150 + face.lookY); });
+  $("cheeks").setAttribute("opacity", face.cheeks);
+  document.querySelectorAll(".star").forEach((s) => (s.style.display = target.stars ? "" : "none"));
+  document.querySelectorAll(".pupil").forEach((s) => (s.style.display = target.stars ? "none" : ""));
+  document.querySelectorAll(".lid").forEach((s) => (s.style.display = target.lids ? "" : "none"));
+  $("skin").setAttribute("fill", `url(#${target.skin})`);
+  $("tears").style.display = target.tears ? "" : "none";
+}
+function moodFace() {
+  const base = { stars: false, lids: false, tears: false, oneBrow: 0, open: 0, skin: "hatch", lookX: 0, lookY: 4 };
+  const m = {
+    adventurous: { curve: 22, brow: -6, browLift: 6, cheeks: 0.8 },
+    picky: { curve: 0, brow: 8, browLift: 0, oneBrow: 10, cheeks: 0.3, lids: true },
+    hangry: { curve: -16, brow: 22, browLift: -4, cheeks: 0.2, skin: "hatchRed" },
+    sleepy: { curve: 2, brow: -8, browLift: -2, cheeks: 0.4, lids: true },
+  }[state.mood];
+  Object.assign(target, base, m);
+  for (const k of ["adventurous", "sleepy", "picky", "hangry"]) $("hat-" + k).style.display = k === state.mood ? "" : "none";
+  $("zzz").style.display = state.mood === "sleepy" ? "" : "none";
+}
+// live: every keystroke the drawing reconsiders
+function liveFace() {
+  moodFace();
+  const f = state.food.trim();
+  if (!f) return;
+  const r = T.predict(state);
+  target.curve = (r.pct - 50) * 0.7;
+  target.brow = r.pct < 35 ? 18 : r.pct > 65 ? -8 : 4;
+  target.lookY = 14; target.lookX = Math.sin(f.length) * 6;
+  if (T.isLoved(f)) { target.stars = true; target.lids = false; target.cheeks = 1; target.curve = Math.max(target.curve, 24); }
+  if (T.isFeared(f)) { target.skin = "hatchGreen"; target.lids = true; }
+}
+
+// wobble the crayon line (boiling line animation)
+let seed = 1; setInterval(() => { seed = (seed % 3) + 1; $("wobble").setAttribute("seed", seed); }, 140);
+// idle blink + look toward pointer
+addEventListener("pointermove", (e) => { if (state.busy || state.food) return; const r = $("face").getBoundingClientRect(); target.lookX = Math.max(-8, Math.min(8, (e.clientX - r.left - r.width / 2) / 20)); target.lookY = Math.max(-8, Math.min(10, (e.clientY - r.top - r.height / 2) / 20)); });
+setInterval(() => { if (state.busy || target.lids || target.stars) return; target.lids = true; renderFace(); setTimeout(() => { target.lids = state.mood === "picky" || state.mood === "sleepy"; }, 130); }, 3300);
+(function loop() { renderFace(); requestAnimationFrame(loop); })();
+
+// ---------- controls ----------
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-mood],[data-plate],[data-meal]");
+  if (!b || state.busy) return;
+  Object.assign(state, b.dataset.mood ? { mood: b.dataset.mood } : b.dataset.plate ? { plate: b.dataset.plate } : { meal: b.dataset.meal });
+  clack(); liveFace(); sync();
+});
+$("food").addEventListener("input", (e) => {
+  state.food = e.target.value;
+  const em = state.food.trim() ? T.foodLook(state.food).emoji : "";
+  if ($("emo").textContent !== em) { $("emo").textContent = em; $("emo").animate([{ transform: "scale(1.5) rotate(-15deg)" }, { transform: "none" }], 250); }
+  liveFace(); sync();
+});
+$("food").addEventListener("keydown", (e) => e.key === "Enter" && !$("ask").disabled && ask());
+$("ask").addEventListener("click", ask);
+
+// ---------- reactions ----------
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+function say(text, ms = 2600) { $("sayText").textContent = text; $("say").classList.add("show"); clearTimeout(say.t); say.t = setTimeout(() => $("say").classList.remove("show"), ms); }
+const head = () => $("head");
+function flyFood(emoji, to, ms) {
+  const el = $("foodFly"); el.textContent = emoji; el.style.display = "";
+  return el.animate(to, { duration: ms, fill: "forwards", easing: "cubic-bezier(.4,0,.6,1)" }).finished;
+}
+const REACT = {
+  async gobble(r) {
+    Object.assign(target, { stars: true, lids: false, open: 1, brow: -10, browLift: 8, lookY: 14 });
+    await flyFood(r.look.emoji, [{ transform: "translate(0,0) scale(1)" }, { transform: "translate(0,-140px) scale(.5)", opacity: 1 }, { transform: "translate(0,-120px) scale(.2)", opacity: 0 }], 700);
+    for (let i = 0; i < 5; i++) { target.open = 0.1; tone(200, 120, 0.06, "square", 0.06); await wait(110); target.open = 0.8; await wait(110); }
+    Object.assign(target, { open: 0, curve: 34, cheeks: 1 });
+    say(r.says); [523, 659, 784].forEach((f, i) => setTimeout(() => tone(f, f, 0.15, "triangle", 0.08), i * 90));
+    head().animate([{ transform: "rotate(0)" }, { transform: "rotate(-8deg)" }, { transform: "rotate(8deg)" }, { transform: "rotate(0)" }], { duration: 500, iterations: 3 });
+    await wait(1600);
+  },
+  async suspicious(r) {
+    Object.assign(target, { lids: true, oneBrow: 14, brow: 10, curve: -2, lookY: 16 });
+    await wait(500);
+    for (const x of [-10, 10, -10, 0]) { target.lookX = x; await wait(330); }
+    say(r.says); tone(300, 420, 0.3, "triangle", 0.08);
+    await wait(1600);
+  },
+  async negotiate(r) {
+    Object.assign(target, { curve: 12, brow: -4, lookX: 10, lookY: -6, oneBrow: 8 });
+    say(r.says, 3000); tone(440, 520, 0.2, "triangle", 0.08);
+    await wait(2400);
+  },
+  async throw(r) {
+    Object.assign(target, { brow: 26, browLift: -6, curve: -20, lookY: 16, lids: false });
+    await wait(500);
+    const box = $("face").getBoundingClientRect();
+    tone(300, 1500, 0.3, "sawtooth", 0.04);
+    await flyFood(r.look.emoji, [{ transform: "translate(0,0) rotate(0)" }, { transform: "translate(120px,-360px) rotate(540deg) scale(1.6)" }], 500);
+    $("foodFly").style.display = "none";
+    // it sticks to the fridge door and slides down
+    const s = document.createElement("div"); s.className = "splat"; s.textContent = r.look.emoji;
+    s.style.left = box.width * 0.72 + "px"; s.style.top = "40px"; $("door").appendChild(s);
+    tone(160, 50, 0.3, "sine", 0.25);
+    s.animate([{ transform: "scale(2.2)" }, { transform: "scale(1.2)", offset: 0.1 }, { transform: "translateY(260px) scale(1.2) rotate(20deg)" }], { duration: 2600, easing: "ease-in", fill: "forwards" });
+    $("sheet").classList.add("shake"); setTimeout(() => $("sheet").classList.remove("shake"), 500);
+    Object.assign(target, { curve: 28, brow: 14 });
+    say(r.says);
+    await wait(1800);
+  },
+  async cry(r) {
+    Object.assign(target, { lids: true, open: 1, brow: -18, browLift: 6, tears: true, cheeks: 1 });
+    say(r.says); tone(520, 300, 0.5, "triangle", 0.1); setTimeout(() => tone(480, 220, 0.8, "triangle", 0.1), 450);
+    const a = $("sheet").animate([{ transform: "rotate(-1.5deg)" }, { transform: "rotate(-3deg) translateX(-4px)" }, { transform: "rotate(0deg) translateX(4px)" }], { duration: 160, iterations: 12 });
+    document.querySelectorAll(".tear").forEach((t) => t.animate([{ strokeDasharray: "0 80" }, { strokeDasharray: "80 0" }], { duration: 500, iterations: 4 }));
+    await a.finished;
+  },
+  async gag(r) {
+    Object.assign(target, { skin: "hatchGreen", lids: true, open: 0.5, brow: -14 });
+    say(r.says);
+    head().animate([{ transform: "none" }, { transform: "translateY(-6px) rotate(-6deg)" }, { transform: "none" }], { duration: 300, iterations: 4 });
+    await wait(1800);
+  },
+  async sleep(r) {
+    Object.assign(target, { lids: true, curve: 4, brow: -8 });
+    $("zzz").style.display = ""; say(r.says);
+    await head().animate([{ transform: "none" }, { transform: "rotate(18deg) translateY(10px)" }], { duration: 1400, fill: "forwards", easing: "ease-in" }).finished;
+    await wait(900);
+  },
+};
+REACT.dance = REACT.gobble;
+
+async function ask() {
+  if (state.busy || !state.food.trim()) return;
+  state.busy = true; sync(); $("food").blur();
+  $("result").classList.remove("show");
+  $("sheet").scrollIntoView({ behavior: "smooth", block: "start" });
+  const r = T.predict(state);
+  await wait(500);
+  await REACT[r.reaction](r);
+  showResult(r);
+}
+const VERDICT = { yes: "YUM. They'll eat it.", maybe: "Hmm. Maybe.", no: "NOPE." };
+const STICKER = {
+  yes: `<svg class="sticker" viewBox="0 0 100 100"><path d="M50 4 l13 28 30 3 -23 20 7 30 -27 -16 -27 16 7 -30 -23 -20 30 -3z" fill="#F7C948" stroke="#E0A800" stroke-width="4"/><text x="50" y="62" font-family="Baloo 2" font-weight="800" font-size="15" text-anchor="middle" fill="#8A5A3B">GOOD</text></svg>`,
+  maybe: `<svg class="sticker" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#F6893B"/><text x="50" y="68" font-family="Baloo 2" font-weight="800" font-size="52" text-anchor="middle" fill="#fff">?</text></svg>`,
+  no: `<svg class="sticker" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#E5383B" stroke-width="7"/><text x="50" y="62" font-family="Baloo 2" font-weight="800" font-size="30" text-anchor="middle" fill="#E5383B">NO</text></svg>`,
+};
+function showResult(r) {
+  const el = $("result");
+  el.className = "result " + r.verdict;
+  el.innerHTML = `<span class="pin" style="left:46%;background:${COLORS[r.pct % COLORS.length]}"></span>${STICKER[r.verdict]}
+    <div class="big">${r.pct}%</div><div class="v">${VERDICT[r.verdict]}</div>
+    <p class="line">${r.line}</p>
+    <ul>${r.factors.filter(([, d]) => d).map(([l, d]) => `<li><span>${l}</span><span class="${d > 0 ? "up" : "down"}">${d > 0 ? "+" : ""}${d}</span></li>`).join("")}</ul>
+    <button class="again" id="again">TRY ANOTHER FOOD</button>`;
+  void el.offsetWidth; el.classList.add("show");
+  tone(180, 90, 0.12, "square", 0.08);
+  setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+  $("again").onclick = () => {
+    el.classList.remove("show"); document.querySelectorAll(".splat").forEach((s) => s.remove());
+    $("head").getAnimations().forEach((a) => a.cancel()); $("foodFly").style.display = "none";
+    state.busy = false; state.food = ""; $("food").value = ""; $("emo").textContent = ""; moodFace(); sync();
+    scrollTo({ top: 0, behavior: "smooth" }); $("food").focus();
+  };
+  state.busy = false; sync();
+}
+
+moodFace(); sync();
+window.__ask = (food, mood, plate, meal) => { Object.assign(state, { food, mood, plate, meal }); $("food").value = food; liveFace(); sync(); return ask(); };
+window.__type = (food) => { state.food = food; $("food").value = food; $("emo").textContent = T.foodLook(food).emoji; liveFace(); sync(); };
+</script>
+</body>
+</html>

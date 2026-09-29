@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>3. Mealtime Casino</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Shade&family=Figtree:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --felt: #0E5A3A; --night: #140A24; --gold: #F7C948; --neon-pink: #FF3EA5; --bulb: #FFF3B0; --reel: #FFFFFF; --ink: #140A24; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--night); color: var(--reel); font: 400 15px/1.35 "Figtree", sans-serif; overflow-x: hidden; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 14px 12px 40px; }
+
+  .cabinet { background: var(--neon-pink); border-radius: 24px; padding: 10px; box-shadow: 0 0 0 4px var(--gold), 0 0 40px rgba(255,62,165,.45); position: relative; }
+  .marquee { position: relative; background: var(--night); border-radius: 16px; padding: 18px 14px 14px; text-align: center; overflow: hidden; }
+  .marquee h1 { font: 400 36px/0.95 "Bungee Shade", sans-serif; color: var(--gold); text-shadow: 0 0 14px rgba(247,201,72,.6); }
+  .marquee p { font: 400 14px "Bungee"; color: var(--neon-pink); margin-top: 6px; letter-spacing: .04em; }
+  .bulbs { position: absolute; inset: 4px; pointer-events: none; }
+  .bulbs i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--bulb); box-shadow: 0 0 6px var(--bulb); animation: chase 1s steps(1) infinite; }
+  .bulbs i:nth-child(odd) { animation-delay: .5s; }
+  .fast .bulbs i { animation-duration: .2s; }
+  .bust .bulbs i { background: #FF4D4D; box-shadow: 0 0 8px #FF4D4D; animation: flicker .9s steps(2) infinite; }
+  @keyframes chase { 50% { opacity: .15; box-shadow: none; } }
+  @keyframes flicker { 30% { opacity: .1; } 60% { opacity: 1; } 70% { opacity: .2; } }
+
+  .led { margin-top: 10px; background: #000; border-radius: 12px; padding: 8px 12px; border: 2px solid #2A1B40; }
+  .led label { font: 400 11px "Bungee"; color: var(--neon-pink); letter-spacing: .06em; display: block; }
+  .led .row { display: flex; align-items: center; gap: 8px; }
+  .led input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; font: 400 24px "Bungee"; color: var(--gold); text-shadow: 0 0 10px rgba(247,201,72,.6); text-transform: uppercase; }
+  .led input::placeholder { color: #5A4A20; text-shadow: none; }
+  .led .emo { font-size: 28px; }
+
+  .machine { display: flex; gap: 8px; margin-top: 10px; align-items: stretch; }
+  .window { flex: 1; background: var(--night); border-radius: 14px; padding: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; position: relative; }
+  .reel { height: 192px; overflow: hidden; background: var(--reel); border-radius: 8px; position: relative; }
+  .reel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#140A24cc, transparent 30%, transparent 70%, #140A24cc); pointer-events: none; }
+  .strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+  .sym { height: 64px; display: grid; place-items: center; font-size: 44px; }
+  .payline { position: absolute; left: 2px; right: 2px; top: 50%; height: 3px; margin-top: -1px; background: #FF4D4D; box-shadow: 0 0 8px #FF4D4D; opacity: .8; z-index: 2; pointer-events: none; }
+  .win .reel { animation: winpulse .4s 4; }
+  @keyframes winpulse { 50% { box-shadow: 0 0 0 4px var(--gold), 0 0 24px var(--gold); } }
+
+  .lever { width: 48px; margin-right: 4px; position: relative; touch-action: none; }
+  .lever .base { position: absolute; bottom: 20px; left: 8px; width: 28px; height: 40px; border-radius: 8px; background: #3A2A55; }
+  .lever .arm { position: absolute; left: 18px; width: 8px; bottom: 50px; height: 150px; background: #C9C9D6; border-radius: 4px; transform-origin: 50% 100%; }
+  .lever .knob { position: absolute; left: 2px; top: 0px; width: 40px; height: 40px; border-radius: 50%; background: #E81E3A; box-shadow: inset -6px -8px 0 rgba(0,0,0,.25), 0 0 16px rgba(232,30,58,.6); cursor: grab; }
+  .lever .hint { position: absolute; bottom: 0; width: 100%; text-align: center; font: 400 9px "Bungee"; color: var(--night); }
+
+  .payout { margin-top: 10px; background: #000; border-radius: 12px; padding: 12px; text-align: center; min-height: 86px; display: flex; flex-direction: column; justify-content: center; }
+  .payout .big { font: 400 32px/1 "Bungee"; color: var(--gold); text-shadow: 0 0 14px rgba(247,201,72,.7); }
+  .payout .small { font: 400 13px "Bungee"; color: var(--neon-pink); margin-top: 6px; }
+  .bust .payout .big { color: #FF4D4D; text-shadow: 0 0 14px rgba(255,77,77,.7); }
+  .payout.idle .big { font-size: 18px; color: #6B5A30; text-shadow: none; }
+
+  .table { margin-top: 14px; background: var(--felt); border-radius: 20px; padding: 14px 12px; box-shadow: inset 0 0 0 3px #0B4A30, inset 0 0 40px rgba(0,0,0,.35); }
+  .table h2 { font: 400 13px "Bungee"; color: var(--gold); letter-spacing: .04em; margin: 0 0 8px; display: flex; justify-content: space-between; }
+  .table h2 em { font: 600 12px "Figtree"; font-style: normal; color: var(--bulb); letter-spacing: 0; }
+  .table h2 + * { margin-bottom: 14px; }
+  .chips { display: flex; justify-content: space-between; }
+  .chip { width: 48px; height: 48px; border-radius: 50%; border: 0; position: relative; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.35); transition: transform .15s; }
+  .chip::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; border: 4px dashed rgba(255,255,255,.85); }
+  .chip::after { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: rgba(255,255,255,.3); }
+  .chip.on { transform: translateY(-8px); box-shadow: 0 12px 0 rgba(0,0,0,.35), 0 0 0 3px var(--gold); }
+  .chip i { position: absolute; top: -12px; right: -6px; font-style: normal; font-size: 16px; z-index: 2; }
+  .signs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .sign { height: 58px; border-radius: 10px; border: 2px solid rgba(247,201,72,.4); background: rgba(0,0,0,.2); color: var(--reel); font: 400 10px "Bungee"; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .sign b { font-size: 22px; line-height: 1; font-weight: 400; }
+  .sign small { font: 600 10px "Figtree"; opacity: .75; }
+  .sign.on { border-color: var(--gold); background: var(--gold); color: var(--ink); }
+
+  .ticket { margin: -6px auto 0; width: 86%; background: #FFFDF5; color: var(--ink); padding: 0 14px; max-height: 0; overflow: hidden; transition: max-height 1.4s steps(18), padding .2s; font: 400 13px/1.35 "Figtree"; border-radius: 0 0 6px 6px; box-shadow: 0 6px 16px rgba(0,0,0,.4); position: relative; z-index: 0; }
+  .ticket.show { max-height: 460px; padding: 14px; }
+  .ticket h3 { font: 400 16px "Bungee"; text-align: center; border-bottom: 2px dashed #C9C2B0; padding-bottom: 8px; }
+  .ticket .pct { font: 400 48px/1 "Bungee"; text-align: center; margin: 10px 0 2px; }
+  .ticket .odds { text-align: center; font-weight: 800; font-size: 12px; }
+  .ticket .line { margin: 10px 0; font-size: 16px; font-weight: 600; text-align: center; }
+  .ticket .f { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; border-top: 1px dotted #C9C2B0; padding: 3px 0; }
+  .ticket .up { color: var(--felt); font-weight: 800; } .ticket .down { color: #C8102E; font-weight: 800; }
+  .ticket .bar { height: 26px; margin-top: 10px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 7px, transparent 7px 9px); }
+  .ticket button { margin-top: 12px; width: 100%; height: 44px; border: 0; border-radius: 10px; background: var(--ink); color: var(--gold); font: 400 15px "Bungee"; cursor: pointer; }
+
+  .rain { position: fixed; top: -60px; font-size: 34px; pointer-events: none; z-index: 20; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cabinet" id="cab">
+    <div class="marquee">
+      <div class="bulbs" id="bulbs"></div>
+      <h1>MEALTIME<br>CASINO</h1>
+      <p>WILL MY TODDLER EAT THIS?</p>
+    </div>
+
+    <div class="led">
+      <label for="food">PLACE YOUR BET</label>
+      <div class="row"><input id="food" placeholder="type a food" autocomplete="off"><span class="emo" id="emo"></span></div>
+    </div>
+
+    <div class="machine">
+      <div class="window" id="window">
+        <div class="reel"><div class="strip"></div></div>
+        <div class="reel"><div class="strip"></div></div>
+        <div class="reel"><div class="strip"></div></div>
+        <div class="payline"></div>
+      </div>
+      <div class="lever" id="lever">
+        <div class="base"></div>
+        <div class="arm" id="arm"><div class="knob" id="knob"></div></div>
+        <div class="hint">PULL</div>
+      </div>
+    </div>
+
+    <div class="payout idle" id="payout"><div class="big">TYPE A FOOD, PULL THE LEVER</div><div class="small">The house always wins. The house is 2.</div></div>
+  </div>
+
+  <div class="ticket" id="ticket"></div>
+
+  <div class="table">
+    <h2>TABLE <em id="moodNote"></em></h2>
+    <div class="signs" id="moods"></div>
+    <h2>YOUR CHIP (PLATE) <em id="plateHint"></em></h2>
+    <div class="chips" id="plates"></div>
+    <h2>SESSION</h2>
+    <div class="signs" id="meals"></div>
+  </div>
+</div>
+
+<script src="predict.js"></script>
+<script>
+const T = window.Toddler;
+const $ = (id) => document.getElementById(id);
+const state = { food: "", mood: "picky", plate: "red", meal: "dinner", busy: false };
+
+// bulbs round the marquee
+(function () {
+  const el = $("bulbs"), n = 38, html = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / n, per = 2 * (1 + 0.55);
+    let x, y, d = t * per;
+    if (d < 1) { x = d; y = 0; } else if (d < 1.55) { x = 1; y = (d - 1) / 0.55; } else if (d < 2.55) { x = 1 - (d - 1.55); y = 1; } else { x = 0; y = 1 - (d - 2.55) / 0.55; }
+    html.push(`<i style="left:calc(${x * 100}% - ${x * 7}px);top:calc(${y * 100}% - ${y * 7}px)"></i>`);
+  }
+  el.innerHTML = html.join("");
+})();
+
+const STAKES = { adventurous: "Low stakes", picky: "House edge", hangry: "High stakes", sleepy: "Closing soon" };
+const { fav, cursed } = T.todaysPlates();
+$("plateHint").textContent = `👑 ${fav.name.split(" ")[1]} pays double today`;
+$("moods").innerHTML = T.MOODS.map((m) => `<button class="sign" data-mood="${m.id}"><b>${m.emoji}</b>${m.label}<small>${STAKES[m.id]}</small></button>`).join("");
+$("plates").innerHTML = T.PLATES.map((p) => `<button class="chip" data-plate="${p.id}" style="background:${p.color}" aria-label="${p.name}">${p.id === fav.id ? "<i>👑</i>" : p.id === cursed.id ? "<i>💀</i>" : ""}</button>`).join("");
+$("meals").innerHTML = T.MEALS.map((m) => `<button class="sign" data-meal="${m.id}"><b>${m.emoji}</b>${m.label}</button>`).join("");
+
+function sync() {
+  document.querySelectorAll("[data-mood]").forEach((b) => b.classList.toggle("on", b.dataset.mood === state.mood));
+  document.querySelectorAll("[data-plate]").forEach((b) => b.classList.toggle("on", b.dataset.plate === state.plate));
+  document.querySelectorAll("[data-meal]").forEach((b) => b.classList.toggle("on", b.dataset.meal === state.meal));
+  $("moodNote").textContent = STAKES[state.mood];
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-mood],[data-plate],[data-meal]");
+  if (!b || state.busy) return;
+  Object.assign(state, b.dataset.mood ? { mood: b.dataset.mood } : b.dataset.plate ? { plate: b.dataset.plate } : { meal: b.dataset.meal });
+  tone(1200, 800, 0.05, "square", 0.04); sync();
+});
+$("food").addEventListener("input", (e) => {
+  state.food = e.target.value;
+  $("emo").textContent = state.food.trim() ? T.foodLook(state.food).emoji : "";
+});
+$("food").addEventListener("keydown", (e) => e.key === "Enter" && spin());
+
+// ---------- sound ----------
+const AC = window.AudioContext && new AudioContext();
+function tone(f0, f1, dur, type = "sine", vol = 0.1, when = 0) {
+  if (!AC) return; if (AC.state === "suspended") AC.resume();
+  const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + when;
+  o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur);
+}
+const sfx = {
+  clunk: () => tone(140, 60, 0.12, "square", 0.12),
+  jackpot: () => [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, f, 0.14, "square", 0.06, i * 0.1)),
+  trombone: () => [392, 370, 349, 294].forEach((f, i) => tone(f, f * 0.97, i === 3 ? 1.0 : 0.38, "sawtooth", 0.06, i * 0.42)),
+  meh: () => { tone(330, 330, 0.2, "triangle", 0.08); tone(311, 300, 0.4, "triangle", 0.08, 0.22); },
+};
+
+// ---------- reels ----------
+const FILL = ["😋", "🍽️", "🤔", "🍪", "💥", "😭", "🐶", "🤢", "😴", "🥄", "⭐"];
+const OUTCOME = {
+  gobble: { reels: ["😋", "😋", "😋"], big: "JACKPOT!", small: "Pays: one full toddler", win: true },
+  dance: { reels: ["🍽️", "🍽️", "🍽️"], big: "CLEAN PLATE!", small: "Pays: chair dance, film it", win: true },
+  suspicious: { reels: ["🤔", "🤔", "🥄"], big: "TWO OF A KIND", small: "Pays: exactly one bite" },
+  negotiate: { reels: ["🍪", "🍪", "🥄"], big: "PUSH", small: "They want a biscuit to continue" },
+  throw: { reels: ["💥", "💥", "💥"], big: "BUST!", small: "Food on floor. Dog wins.", bust: true },
+  cry: { reels: ["😭", "😭", "😭"], big: "BUST!", small: "Tears on the table", bust: true },
+  gag: { reels: ["🤢", "🤢", "🤢"], big: "BUST!", small: "Dramatic gagging. No refunds.", bust: true },
+  sleep: { reels: ["😴", "😴", "😴"], big: "TABLE CLOSED", small: "Dealer fell asleep in the food", bust: true },
+};
+const SYM = 64;
+const reels = [...document.querySelectorAll(".strip")];
+function fillStrip(strip, final, n) {
+  const syms = [];
+  for (let i = 0; i < n; i++) syms.push(FILL[Math.floor(Math.random() * FILL.length)]);
+  syms.push(final, FILL[Math.floor(Math.random() * FILL.length)]);
+  syms.unshift(FILL[Math.floor(Math.random() * FILL.length)]);
+  strip.innerHTML = syms.map((s) => `<div class="sym">${s}</div>`).join("");
+  return syms.length - 2; // index of final
+}
+reels.forEach((s, i) => { fillStrip(s, ["🍽️", "😋", "🍪"][i], 0); s.style.transform = `translateY(${-(1 - 1) * SYM}px)`; });
+
+async function spinReels(targets) {
+  const runs = reels.map((strip, i) => {
+    const idx = fillStrip(strip, targets[i], 18 + i * 6);
+    // final symbol sits in the middle row (row 1 of 3 visible)
+    const end = -(idx - 1) * SYM;
+    const anim = strip.animate([{ transform: "translateY(0)", filter: "blur(0)" }, { transform: `translateY(${end * 0.2}px)`, filter: "blur(2px)", offset: 0.15 }, { transform: `translateY(${end * 0.97}px)`, filter: "blur(1px)", offset: 0.85 }, { transform: `translateY(${end + 10}px)`, filter: "blur(0)", offset: 0.93 }, { transform: `translateY(${end}px)`, filter: "blur(0)" }], { duration: 1300 + i * 550, easing: "cubic-bezier(.2,.6,.3,1)", fill: "forwards" });
+    anim.finished.then(sfx.clunk);
+    return anim.finished;
+  });
+  // spinning tick
+  const tick = setInterval(() => tone(1800, 1500, 0.02, "square", 0.02), 60);
+  await Promise.all(runs); clearInterval(tick);
+}
+
+// ---------- lever ----------
+const arm = $("arm"), knob = $("knob");
+let drag = null;
+knob.addEventListener("pointerdown", (e) => { if (state.busy) return; drag = { y: e.clientY, d: 0 }; knob.setPointerCapture(e.pointerId); knob.style.cursor = "grabbing"; });
+knob.addEventListener("pointermove", (e) => { if (!drag) return; drag.d = Math.max(0, Math.min(120, e.clientY - drag.y)); arm.style.transform = `scaleY(${1 - drag.d / 170})`; knob.style.transform = `scaleY(${1 / (1 - drag.d / 170)})`; });
+knob.addEventListener("pointerup", () => { if (!drag) return; const pulled = drag.d > 60; drag = null; knob.style.cursor = ""; springBack(); if (pulled) spin(); });
+knob.addEventListener("click", () => { if (!state.busy && !drag) pullAnim().then(spin); });
+function springBack() { arm.animate([{ transform: arm.style.transform || "none" }, { transform: "scaleY(1.05)" }, { transform: "none" }], { duration: 400, easing: "ease-out" }); arm.style.transform = ""; knob.style.transform = ""; }
+async function pullAnim() { await arm.animate([{ transform: "none" }, { transform: "scaleY(.3)" }, { transform: "none" }], { duration: 500, easing: "ease-in-out" }).finished; }
+
+// ---------- flow ----------
+async function spin() {
+  if (state.busy) return;
+  if (!state.food.trim()) { $("payout").className = "payout idle"; $("payout").innerHTML = `<div class="big">NO BET, NO SPIN</div><div class="small">Type a food first</div>`; $("food").focus(); return; }
+  state.busy = true; $("food").blur();
+  $("cab").className = "cabinet fast"; $("ticket").className = "ticket"; $("window").classList.remove("win");
+  $("payout").className = "payout idle"; $("payout").innerHTML = `<div class="big">SPINNING...</div><div class="small">No refunds. No substitutions.</div>`;
+  const r = T.predict(state), o = OUTCOME[r.reaction];
+  await spinReels(o.reels);
+  $("cab").className = "cabinet" + (o.win ? " fast" : o.bust ? " bust" : "");
+  $("payout").className = "payout"; $("payout").innerHTML = `<div class="big">${o.big}</div><div class="small">${o.small}</div>`;
+  if (o.win) { sfx.jackpot(); $("window").classList.add("win"); rain(r.look.emoji); }
+  else if (o.bust) sfx.trombone();
+  else sfx.meh();
+  navigator.vibrate?.(o.win ? [60, 40, 60, 40, 200] : 150);
+  await new Promise((res) => setTimeout(res, 700));
+  printTicket(r);
+  state.busy = false;
+}
+function rain(emoji) {
+  for (let i = 0; i < 36; i++) {
+    const d = document.createElement("div"); d.className = "rain"; d.textContent = i % 3 ? emoji : "🪙";
+    d.style.left = Math.random() * 100 + "vw"; document.body.appendChild(d);
+    d.animate([{ transform: `translateY(0) rotate(0)` }, { transform: `translateY(${innerHeight + 120}px) rotate(${Math.random() * 720 - 360}deg)` }], { duration: 1400 + Math.random() * 1400, delay: Math.random() * 800, easing: "cubic-bezier(.4,0,1,1)", fill: "forwards" }).finished.then(() => d.remove());
+  }
+}
+function printTicket(r) {
+  const t = $("ticket");
+  t.innerHTML = `<h3>🎟 PAYOUT TICKET</h3>
+    <div class="pct">${r.pct}%</div><div class="odds">ODDS THEY EAT ${r.look.emoji} ${state.food.trim().toUpperCase()}</div>
+    <p class="line">${r.line}</p>
+    ${r.factors.filter(([, d]) => d).map(([l, d]) => `<div class="f"><span>${l}</span><span class="${d > 0 ? "up" : "down"}">${d > 0 ? "+" : ""}${d}</span></div>`).join("")}
+    <div class="bar"></div>
+    <button id="again">BET AGAIN</button>`;
+  void t.offsetWidth; t.classList.add("show");
+  const printer = setInterval(() => tone(2400 + Math.random() * 400, 2000, 0.03, "square", 0.015), 70);
+  setTimeout(() => clearInterval(printer), 1400);
+  setTimeout(() => t.scrollIntoView({ behavior: "smooth", block: "center" }), 400);
+  $("again").onclick = () => { t.className = "ticket"; state.food = ""; $("food").value = ""; $("emo").textContent = ""; $("cab").className = "cabinet"; scrollTo({ top: 0, behavior: "smooth" }); $("food").focus(); };
+}
+sync();
+window.__spin = (food, mood, plate, meal) => { Object.assign(state, { food, mood, plate, meal }); $("food").value = food; $("emo").textContent = T.foodLook(food).emoji; sync(); return spin(); };
+</script>
+</body>
+</html>
