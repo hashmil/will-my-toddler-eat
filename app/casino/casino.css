@@ -1,0 +1,88 @@
+/* Mealtime Casino. Tokens in mockups/DESIGN.md, concept 3. */
+.ca {
+  --felt: #0E5A3A; --night: #140A24; --gold: #F7C948; --neon-pink: #FF3EA5; --bulb: #FFF3B0; --reel: #FFFFFF; --ink: #140A24;
+  --sign: var(--font-bungee), sans-serif; --text: var(--font-figtree), sans-serif;
+  background: var(--night); color: var(--reel); font: 400 15px/1.35 var(--text); overflow-x: hidden; min-height: 100vh;
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  button { font-family: inherit; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 14px 12px 40px; }
+
+  .cabinet { background: var(--neon-pink); border: 4px solid var(--gold); border-radius: 24px; padding: 6px; box-shadow: 0 0 40px rgba(255,62,165,.45); position: relative; z-index: 1; }
+  .marquee { position: relative; background: var(--night); border-radius: 16px; padding: 18px 14px 14px; text-align: center; overflow: hidden; }
+  .marquee h1 { font: 400 36px/0.95 var(--font-bungee-shade), sans-serif; color: var(--gold); text-shadow: 0 0 14px rgba(247,201,72,.6); }
+  .marquee p { font: 400 14px var(--sign); color: var(--neon-pink); margin-top: 6px; letter-spacing: .04em; }
+  .bulbs { position: absolute; inset: 4px; pointer-events: none; }
+  .bulbs i { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--bulb); box-shadow: 0 0 6px var(--bulb); animation: ca-chase 1s steps(1) infinite; }
+  .bulbs i:nth-child(odd) { animation-delay: .5s; }
+  .fast .bulbs i { animation-duration: .2s; }
+  .bust .bulbs i { background: #FF4D4D; box-shadow: 0 0 8px #FF4D4D; animation: ca-flicker .9s steps(2) infinite; }
+
+  .led { margin-top: 10px; background: #000; border-radius: 12px; padding: 8px 12px; border: 2px solid #2A1B40; }
+  .led label { font: 400 11px var(--sign); color: var(--neon-pink); letter-spacing: .06em; display: block; }
+  .led .row { display: flex; align-items: center; gap: 8px; }
+  .led input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; font: 400 24px var(--sign); color: var(--gold); text-shadow: 0 0 10px rgba(247,201,72,.6); text-transform: uppercase; }
+  .led input::placeholder { color: #5A4A20; text-shadow: none; }
+  .led .emo { font-size: 28px; }
+
+  .machine { display: flex; gap: 8px; margin-top: 10px; align-items: stretch; }
+  .window { flex: 1; background: var(--night); border-radius: 14px; padding: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; position: relative; }
+  .reel { height: 192px; overflow: hidden; background: var(--reel); border-radius: 8px; position: relative; }
+  .reel::after { content: ""; position: absolute; inset: 0; background: linear-gradient(#140A24cc, transparent 30%, transparent 70%, #140A24cc); pointer-events: none; }
+  .strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+  .sym { height: 64px; display: grid; place-items: center; font-size: 44px; }
+  .payline { position: absolute; left: 2px; right: 2px; top: 50%; height: 3px; margin-top: -1px; background: #FF4D4D; box-shadow: 0 0 8px #FF4D4D; opacity: .8; z-index: 2; pointer-events: none; }
+  .win .reel { animation: ca-winpulse .4s 4; }
+
+  .lever { width: 48px; margin-right: 4px; position: relative; touch-action: none; outline: none; }
+  .lever .base { position: absolute; bottom: 20px; left: 10px; width: 28px; height: 40px; border-radius: 8px; background: #3A2A55; }
+  .lever .arm { position: absolute; left: 20px; width: 8px; bottom: 50px; height: 150px; background: #C9C9D6; border-radius: 4px; transform-origin: 50% 100%; }
+  .lever .knob { position: absolute; left: -16px; top: 0; width: 40px; height: 40px; border-radius: 50%; background: #E81E3A; box-shadow: inset -6px -8px 0 rgba(0,0,0,.25), 0 0 16px rgba(232,30,58,.6); cursor: grab; touch-action: none; }
+  .lever .knob:active { cursor: grabbing; }
+  .lever:focus-visible .knob { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .lever .hint { position: absolute; bottom: 0; width: 100%; text-align: center; font: 400 9px var(--sign); color: var(--night); }
+
+  .payout { margin-top: 10px; background: #000; border-radius: 12px; padding: 12px; text-align: center; min-height: 86px; display: flex; flex-direction: column; justify-content: center; }
+  .payout .big { font: 400 32px/1 var(--sign); color: var(--gold); text-shadow: 0 0 14px rgba(247,201,72,.7); }
+  .payout .small { font: 400 13px var(--sign); color: var(--neon-pink); margin-top: 6px; }
+  .bust .payout .big { color: #FF4D4D; text-shadow: 0 0 14px rgba(255,77,77,.7); }
+  .payout.idle .big { font-size: 18px; color: #6B5A30; text-shadow: none; }
+
+  .table { margin-top: 14px; background: var(--felt); border-radius: 20px; padding: 14px 12px; box-shadow: inset 0 0 0 3px #0B4A30, inset 0 0 40px rgba(0,0,0,.35); }
+  .table h2 { font: 400 13px/1 var(--sign); color: var(--gold); letter-spacing: .04em; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; }
+  .table h2 em { font: 600 12px/1 var(--text); font-style: normal; color: var(--bulb); letter-spacing: 0; }
+  .table h2 + * { margin-bottom: 14px; }
+  .chips { display: flex; justify-content: space-between; padding-top: 14px; }
+  .chip { width: 48px; height: 48px; border-radius: 50%; border: 0; position: relative; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,.35); transition: transform .15s; }
+  .chip::before { content: ""; position: absolute; inset: 4px; border-radius: 50%; border: 4px dashed rgba(255,255,255,.85); }
+  .chip::after { content: ""; position: absolute; inset: 14px; border-radius: 50%; background: rgba(255,255,255,.3); }
+  .chip.on { transform: translateY(-8px); box-shadow: 0 12px 0 rgba(0,0,0,.35), 0 0 0 3px var(--gold); }
+  .chip i { position: absolute; top: -12px; right: -6px; font-style: normal; font-size: 16px; z-index: 2; }
+  .signs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .sign { height: 58px; border-radius: 10px; border: 2px solid rgba(247,201,72,.4); background: rgba(0,0,0,.2); color: var(--reel); font: 400 10px var(--sign); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .sign b { font-size: 22px; line-height: 1; font-weight: 400; }
+  .sign small { font: 600 10px var(--text); opacity: .75; }
+  .sign.on { border-color: var(--gold); background: var(--gold); color: var(--ink); }
+
+  .ticket { margin: -6px auto 0; width: 86%; background: #FFFDF5; color: var(--ink); padding: 0 14px; max-height: 0; overflow: hidden; transition: max-height 1.4s steps(18), padding .2s; font: 400 13px/1.35 var(--text); border-radius: 0 0 6px 6px; box-shadow: 0 6px 16px rgba(0,0,0,.4); position: relative; }
+  .ticket.show { max-height: 520px; padding: 14px; }
+  .ticket h3 { font: 400 16px var(--sign); text-align: center; border-bottom: 2px dashed #C9C2B0; padding-bottom: 8px; }
+  .ticket .pct { font: 400 48px/1 var(--sign); text-align: center; margin: 10px 0 2px; }
+  .ticket .odds { text-align: center; font-weight: 800; font-size: 12px; }
+  .ticket .line { margin: 10px 0; font-size: 16px; font-weight: 600; text-align: center; }
+  .ticket .f { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; border-top: 1px dotted #C9C2B0; padding: 3px 0; }
+  .ticket .up { color: var(--felt); font-weight: 800; } .ticket .down { color: #C8102E; font-weight: 800; }
+  .ticket .bar { height: 26px; margin-top: 10px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 7px, transparent 7px 9px); }
+  .ticket .btns { display: flex; gap: 8px; margin-top: 12px; }
+  .ticket button { flex: 1; height: 44px; border: 0; border-radius: 10px; background: var(--ink); color: var(--gold); font: 400 15px var(--sign); cursor: pointer; }
+  .ticket button.ghost { background: none; border: 2px solid var(--ink); color: var(--ink); }
+
+  .vnav { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: center; font: 400 12px var(--sign); }
+  .vnav span { width: 100%; text-align: center; color: var(--neon-pink); }
+  .vnav a { color: var(--gold); }
+}
+
+.ca-rain { position: fixed; top: -60px; font-size: 34px; pointer-events: none; z-index: 20; }
+@keyframes ca-chase { 50% { opacity: .15; box-shadow: none; } }
+@keyframes ca-flicker { 30% { opacity: .1; } 60% { opacity: 1; } 70% { opacity: .2; } }
+@keyframes ca-winpulse { 50% { box-shadow: 0 0 0 4px var(--gold), 0 0 24px var(--gold); } }

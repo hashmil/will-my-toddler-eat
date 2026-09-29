@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "will-my-toddler-eat",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    // only page URLs run the script; everything else is a free static hit
+    "run_worker_first": ["/", "/index.html", "/high-chair", "/high-chair.html", "/fridge", "/fridge.html", "/casino", "/casino.html"]
+  },
+  "routes": [
+    { "pattern": "toddler.hashir.dev", "custom_domain": true },
+    { "pattern": "toddler2.hashir.dev", "custom_domain": true },
+    { "pattern": "toddler3.hashir.dev", "custom_domain": true }
+  ],
+  "workers_dev": false,
+  "preview_urls": false
+}
