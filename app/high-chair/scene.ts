@@ -186,8 +186,20 @@ export function createScene(stage: HTMLDivElement, bubble: HTMLDivElement, splat
   mesh(new THREE.CylinderGeometry(0.46, 0.56, 0.52, 32), mat(0x8b5a2b), acc.adventurous, [0, 0.67, 0]);
   mesh(new THREE.CylinderGeometry(0.565, 0.565, 0.09, 32), mat(0xe63b2e), acc.adventurous, [0, 0.48, 0]);
   acc.adventurous.rotation.z = 0.08;
-  mesh(new THREE.TorusGeometry(0.14, 0.02, 8, 28), mat(0xf7c948, 0.2), acc.picky, [0.22, 0.1, 0.63]);
-  mesh(new THREE.TorusGeometry(0.4, 0.008, 4, 30, 1.6), mat(0xf7c948, 0.2), acc.picky, [0.36, -0.28, 0.5]).rotation.z = -1.2;
+  // monocle: ring and lens tilted to sit flush on the face over the right eye
+  const gold = new THREE.MeshStandardMaterial({ color: 0xf7c948, roughness: 0.25, metalness: 0.6 });
+  const monocle = new THREE.Group();
+  monocle.position.set(0.22, 0.1, 0.63);
+  monocle.rotation.set(-0.15, 0.34, 0);
+  acc.picky.add(monocle);
+  mesh(new THREE.TorusGeometry(0.14, 0.022, 12, 40), gold, monocle);
+  const lens = mesh(new THREE.CircleGeometry(0.135, 32), new THREE.MeshStandardMaterial({ color: 0xdff3ff, transparent: true, opacity: 0.22, roughness: 0.05 }), monocle, [0, 0, -0.005]);
+  lens.castShadow = false;
+  // cord from the ring's lower edge, hugging the cheek, dropping below the chin
+  const cord = new THREE.CatmullRomCurve3([
+    [0.33, 0.01, 0.6], [0.42, -0.16, 0.53], [0.44, -0.36, 0.43], [0.36, -0.56, 0.33], [0.24, -0.72, 0.3],
+  ].map(([x, y, z]) => new THREE.Vector3(x, y, z)));
+  mesh(new THREE.TubeGeometry(cord, 40, 0.009, 6), gold, acc.picky);
   const cap = new THREE.Group();
   cap.position.set(0, 0.42, 0);
   cap.rotation.z = -0.15;
